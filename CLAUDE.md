@@ -114,3 +114,6 @@ db/
 ## Changelog
 
 See [CHANGELOG.md](CHANGELOG.md) for a log of all major changes.
+
+- **Always update CHANGELOG.md** when making major changes (new features, significant bug fixes, architectural changes, dependency updates, etc.)
+- If a plan was created before implementation, reference it in the changelog entry (e.g., "per plan in conversation" or link to relevant context)
