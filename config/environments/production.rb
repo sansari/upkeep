@@ -60,9 +60,6 @@ Rails.application.configure do
   # Only use :id for inspections in production.
   config.active_record.attributes_for_inspect = [ :id ]
 
-  # Allow Railway's assigned domain
-  config.hosts << /\.railway\.app\z/
-
-  # Skip DNS rebinding protection for the default health check endpoint.
-  config.host_authorization = { exclude: ->(request) { request.path == "/up" } }
+  # Allow all hosts (personal app, no authentication)
+  config.hosts.clear
 end
