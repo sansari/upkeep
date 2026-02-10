@@ -1,0 +1,110 @@
+<% content_for(:title) { "#{@task.name} — Upkeep" } %>
+
+<div class="space-y-6">
+  <div class="flex items-center gap-2">
+    <%= link_to "← #{@task.equipment.name}", equipment_path(@task.equipment), class: "text-sm text-gray-500 hover:text-gray-700" %>
+  </div>
+
+  <div>
+    <div class="flex items-center gap-2 flex-wrap">
+      <h1 class="text-2xl font-bold text-gray-900"><%= @task.name %></h1>
+      <%= status_badge(@task.due_status) %>
+      <%= priority_badge(@task.priority) %>
+    </div>
+    <p class="text-sm text-gray-500 mt-1">
+      <%= @task.equipment.area.icon %> <%= @task.equipment.area.name %> &rsaquo; <%= @task.equipment.name %>
+    </p>
+  </div>
+
+  <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 text-sm">
+      <div>
+        <span class="text-gray-500 block text-xs">Frequency</span>
+        <span class="font-medium"><%= @task.frequency_description %></span>
+      </div>
+      <div>
+        <span class="text-gray-500 block text-xs">Next Due</span>
+        <span class="font-medium"><%= @task.next_due_at&.strftime("%b %d, %Y") || "Not scheduled" %></span>
+      </div>
+      <div>
+        <span class="text-gray-500 block text-xs">Last Completed</span>
+        <span class="font-medium"><%= @task.last_completed_at&.strftime("%b %d, %Y") || "Never" %></span>
+      </div>
+      <div>
+        <span class="text-gray-500 block text-xs">Times Completed</span>
+        <span class="font-medium"><%= @task.maintenance_logs.count %></span>
+      </div>
+    </div>
+  </div>
+
+  <% if @task.instructions.present? %>
+    <section>
+      <h2 class="text-lg font-semibold text-gray-900 mb-2">Instructions</h2>
+      <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4 text-sm text-gray-700 whitespace-pre-wrap"><%= @task.instructions %></div>
+    </section>
+  <% end %>
+
+  <% if @task.notes.present? %>
+    <section>
+      <h2 class="text-lg font-semibold text-gray-900 mb-2">Notes</h2>
+      <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4 text-sm text-gray-700 whitespace-pre-wrap"><%= @task.notes %></div>
+    </section>
+  <% end %>
+
+  <% if @task.supplies.any? %>
+    <section>
+      <h2 class="text-lg font-semibold text-gray-900 mb-2">Supplies Needed</h2>
+      <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+        <table class="min-w-full divide-y divide-gray-200">
+          <thead class="bg-gray-50">
+            <tr>
+              <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Supply</th>
+              <th class="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase">Stock</th>
+              <th class="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase">Per Use</th>
+              <th class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">Buy</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-gray-100">
+            <% @task.supplies.each do |supply| %>
+              <tr>
+                <td class="px-4 py-2 text-sm">
+                  <span class="text-gray-900"><%= supply.name %></span>
+                  <%= stock_badge(supply) %>
+                  <% if supply.notes.present? %>
+                    <p class="text-xs text-gray-500 mt-0.5"><%= supply.notes %></p>
+                  <% end %>
+                </td>
+                <td class="px-4 py-2 text-sm text-gray-700 text-center"><%= supply.quantity_on_hand %></td>
+                <td class="px-4 py-2 text-sm text-gray-700 text-center"><%= supply.quantity_per_use %></td>
+                <td class="px-4 py-2 text-sm text-right">
+                  <% if supply.purchase_url.present? %>
+                    <%= link_to "Buy →", supply.purchase_url, target: "_blank", rel: "noopener", class: "text-blue-600 hover:text-blue-800 text-xs font-medium" %>
+                  <% end %>
+                </td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  <% end %>
+
+  <% if @task.maintenance_logs.any? %>
+    <section>
+      <h2 class="text-lg font-semibold text-gray-900 mb-2">History</h2>
+      <div class="bg-white rounded-lg shadow-sm border border-gray-200 px-4 divide-y divide-gray-100">
+        <% @task.maintenance_logs.each do |log| %>
+          <div class="py-3">
+            <div class="flex items-center justify-between">
+              <span class="text-sm font-medium text-gray-900"><%= log.completed_at.strftime("%b %d, %Y") %></span>
+              <span class="text-xs text-gray-400"><%= time_ago_in_words(log.completed_at) %> ago</span>
+            </div>
+            <% if log.notes.present? %>
+              <p class="text-sm text-gray-600 mt-0.5"><%= log.notes %></p>
+            <% end %>
+          </div>
+        <% end %>
+      </div>
+    </section>
+  <% end %>
+</div>

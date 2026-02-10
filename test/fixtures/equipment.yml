@@ -1,0 +1,9 @@
+water_filter:
+  area: kitchen
+  name: Water Filter
+  manufacturer: Aquasana
+
+shower_head:
+  area: bathroom
+  name: Shower Head
+  manufacturer: AquaBliss

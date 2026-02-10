@@ -1,0 +1,22 @@
+replace_water_filter:
+  equipment: water_filter
+  name: Replace filter
+  frequency_value: 12
+  frequency_unit: months
+  priority: medium
+  next_due_at: <%= 3.days.ago.to_fs(:db) %>
+
+replace_shower_filter:
+  equipment: shower_head
+  name: Replace filters
+  frequency_value: 6
+  frequency_unit: months
+  priority: medium
+  next_due_at: <%= 10.days.from_now.to_fs(:db) %>
+
+wash_shower_head:
+  equipment: shower_head
+  name: Clean shower head
+  frequency_value: 3
+  frequency_unit: months
+  priority: low

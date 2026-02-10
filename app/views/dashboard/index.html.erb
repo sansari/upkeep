@@ -1,0 +1,77 @@
+<% content_for(:title) { "Upkeep — Dashboard" } %>
+
+<div class="space-y-6">
+  <h1 class="text-2xl font-bold text-gray-900">Dashboard</h1>
+
+  <% if @overdue_tasks.any? %>
+    <section class="bg-white rounded-lg shadow-sm border border-red-200">
+      <div class="px-4 py-3 border-b border-red-100 bg-red-50 rounded-t-lg">
+        <h2 class="text-sm font-semibold text-red-800">🔴 Overdue (<%= @overdue_tasks.count %>)</h2>
+      </div>
+      <div class="px-4">
+        <% @overdue_tasks.each do |task| %>
+          <%= render "shared/task_row", task: task, show_location: true %>
+        <% end %>
+      </div>
+    </section>
+  <% end %>
+
+  <% if @due_soon_tasks.any? %>
+    <section class="bg-white rounded-lg shadow-sm border border-yellow-200">
+      <div class="px-4 py-3 border-b border-yellow-100 bg-yellow-50 rounded-t-lg">
+        <h2 class="text-sm font-semibold text-yellow-800">🟡 Due Soon (<%= @due_soon_tasks.count %>)</h2>
+      </div>
+      <div class="px-4">
+        <% @due_soon_tasks.each do |task| %>
+          <%= render "shared/task_row", task: task, show_location: true %>
+        <% end %>
+      </div>
+    </section>
+  <% end %>
+
+  <% if @not_scheduled_tasks.any? %>
+    <section class="bg-white rounded-lg shadow-sm border border-gray-200">
+      <div class="px-4 py-3 border-b border-gray-100 bg-gray-50 rounded-t-lg">
+        <h2 class="text-sm font-semibold text-gray-600">⚪ Not Yet Scheduled (<%= @not_scheduled_tasks.count %>)</h2>
+      </div>
+      <div class="px-4">
+        <% @not_scheduled_tasks.each do |task| %>
+          <%= render "shared/task_row", task: task, show_location: true %>
+        <% end %>
+      </div>
+    </section>
+  <% end %>
+
+  <% if @low_stock_supplies.any? %>
+    <section class="bg-white rounded-lg shadow-sm border border-orange-200">
+      <div class="px-4 py-3 border-b border-orange-100 bg-orange-50 rounded-t-lg">
+        <h2 class="text-sm font-semibold text-orange-800">📦 Low Stock Supplies (<%= @low_stock_supplies.count %>)</h2>
+      </div>
+      <div class="px-4 divide-y divide-gray-100">
+        <% @low_stock_supplies.each do |supply| %>
+          <div class="py-3">
+            <div class="flex items-center justify-between">
+              <div>
+                <span class="text-sm font-medium text-gray-900"><%= supply.name %></span>
+                <span class="text-xs text-gray-500 ml-1">(<%= supply.quantity_on_hand %>/<%= supply.quantity_per_use %> on hand)</span>
+              </div>
+              <% if supply.purchase_url.present? %>
+                <%= link_to "Buy →", supply.purchase_url, target: "_blank", rel: "noopener", class: "text-xs text-blue-600 hover:text-blue-800 font-medium" %>
+              <% end %>
+            </div>
+            <div class="text-xs text-gray-500 mt-0.5">
+              For: <%= supply.maintenance_task.equipment.area.name %> &rsaquo; <%= supply.maintenance_task.equipment.name %> &rsaquo; <%= supply.maintenance_task.name %>
+            </div>
+          </div>
+        <% end %>
+      </div>
+    </section>
+  <% end %>
+
+  <% if @overdue_tasks.empty? && @due_soon_tasks.empty? && @not_scheduled_tasks.empty? && @low_stock_supplies.empty? %>
+    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-8 text-center">
+      <p class="text-gray-500 text-lg">✅ Everything is up to date!</p>
+      <p class="text-gray-400 text-sm mt-1">No overdue tasks or low stock supplies.</p>
+    </div>
+  <% end %>
+</div>

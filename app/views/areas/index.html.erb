@@ -1,0 +1,30 @@
+<% content_for(:title) { "Areas — Upkeep" } %>
+
+<div class="space-y-6">
+  <h1 class="text-2xl font-bold text-gray-900">Areas</h1>
+
+  <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+    <% @areas.each do |area| %>
+      <%= link_to area_path(area), class: "block bg-white rounded-lg shadow-sm border border-gray-200 p-4 hover:border-blue-300 hover:shadow transition" do %>
+        <div class="flex items-center justify-between">
+          <div>
+            <h2 class="text-lg font-medium text-gray-900">
+              <span class="mr-1"><%= area.icon %></span> <%= area.name %>
+            </h2>
+            <p class="text-sm text-gray-500 mt-1">
+              <%= area.equipment.count %> <%= "item".pluralize(area.equipment.count) %>
+            </p>
+          </div>
+          <div class="text-right space-y-1">
+            <% if area.overdue_tasks_count > 0 %>
+              <div class="text-xs text-red-600 font-medium"><%= area.overdue_tasks_count %> overdue</div>
+            <% end %>
+            <% if area.due_soon_tasks_count > 0 %>
+              <div class="text-xs text-yellow-600 font-medium"><%= area.due_soon_tasks_count %> due soon</div>
+            <% end %>
+          </div>
+        </div>
+      <% end %>
+    <% end %>
+  </div>
+</div>

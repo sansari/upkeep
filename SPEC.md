@@ -1,0 +1,445 @@
+# Upkeep — Home Maintenance Manager
+
+## 1. Overview
+
+**Upkeep** is a personal home maintenance tracking application. It helps you stay on top of recurring maintenance tasks — like washing HVAC filters, replacing water filters, and seasonal upkeep — by organizing everything around the physical areas of your home and the equipment in each area.
+
+### Core Concept
+
+The data hierarchy is:
+
+```
+House
+└── Area (Kitchen, Bedroom, Outdoor, Whole House, ...)
+    └── Equipment (Mini-Split AC, Water Filter, Shower Head, ...)
+        └── Maintenance Task (Wash filters every 2 months, Replace filter yearly, ...)
+            ├── Maintenance Log (history of completions)
+            └── Supply (filters, parts — with purchase links and inventory)
+```
+
+### Management Model
+
+**Data entry and updates happen through Claude Code conversations.** You tell Claude what you did, what equipment you have, or what supplies you bought, and it creates/updates records via rake tasks or Rails console commands.
+
+**The web app is a read-only status dashboard.** It shows you what's due, what's overdue, what supplies are running low, and lets you drill into areas, equipment, and task details — including instructions and purchase links. It does not have forms or admin functionality.
+
+### Users
+
+This is a personal app for 1–2 people (you and your partner). There is no authentication — the app is accessed via its Railway-provided URL.
+
+---
+
+## 2. Tech Stack
+
+| Component       | Choice                          | Notes                                              |
+|-----------------|---------------------------------|----------------------------------------------------|
+| Framework       | Ruby on Rails 8                 | Latest stable release                              |
+| Ruby            | 3.3+                            |                                                    |
+| Database        | PostgreSQL                      | Railway PostgreSQL addon                           |
+| Frontend        | Hotwire (Turbo + Stimulus)      | Server-rendered, SPA-like interactivity            |
+| CSS             | Tailwind CSS                    | Utility-first, mobile-friendly                     |
+| Testing         | Minitest                        | Rails default                                      |
+| Background Jobs | Solid Queue                     | Rails 8 default; used for periodic status checks   |
+| Deployment      | Railway                         | Auto-deploy from GitHub, no cold starts            |
+| API             | JSON (via `respond_to`)         | All controllers serve HTML + JSON from day one     |
+
+---
+
+## 3. Data Model
+
+### 3.1 Area
+
+Represents a physical area of the house.
+
+| Column       | Type    | Notes                                          |
+|--------------|---------|-------------------------------------------------|
+| `id`         | bigint  | Primary key                                     |
+| `name`       | string  | Required. E.g., "Kitchen", "Whole House"        |
+| `icon`       | string  | Optional. Emoji or icon class for display        |
+| `is_default` | boolean | `true` for seed data, `false` for user-created   |
+| `position`   | integer | For ordering areas in the UI                     |
+| `created_at` | datetime|                                                 |
+| `updated_at` | datetime|                                                 |
+
+**Associations:** `has_many :equipment` (dependent: destroy)
+
+**Seed data:** Kitchen, Bathroom, Bedroom, Living Room, Outdoor, Garage, Basement, Attic, Studio, Whole House
+
+### 3.2 Equipment
+
+A device, appliance, or system within an area that requires maintenance.
+
+| Column          | Type    | Notes                                         |
+|-----------------|---------|------------------------------------------------|
+| `id`            | bigint  | Primary key                                    |
+| `area_id`       | bigint  | Foreign key → Area. Required.                  |
+| `name`          | string  | Required. E.g., "Mini-Split AC"                |
+| `description`   | text    | Optional. General description                   |
+| `model_number`  | string  | Optional. For reference                         |
+| `manufacturer`  | string  | Optional. For reference                         |
+| `purchase_date` | date    | Optional. When the equipment was bought/installed|
+| `notes`         | text    | Optional. Freeform notes                        |
+| `created_at`    | datetime|                                                |
+| `updated_at`    | datetime|                                                |
+
+**Associations:**
+- `belongs_to :area`
+- `has_many :maintenance_tasks` (dependent: destroy)
+
+### 3.3 MaintenanceTask
+
+A recurring (or one-time) maintenance action for a piece of equipment.
+
+| Column              | Type     | Notes                                                  |
+|---------------------|----------|--------------------------------------------------------|
+| `id`                | bigint   | Primary key                                            |
+| `equipment_id`      | bigint   | Foreign key → Equipment. Required.                     |
+| `name`              | string   | Required. E.g., "Wash filters"                         |
+| `instructions`      | text     | Optional. Detailed how-to (can be lengthy)             |
+| `frequency_value`   | integer  | Required. E.g., `2` (for "every 2 months")            |
+| `frequency_unit`    | string   | Required. One of: `days`, `weeks`, `months`, `years`   |
+| `last_completed_at` | datetime | Null if never completed                                |
+| `next_due_at`       | datetime | Computed: `last_completed_at + frequency`. Null if never set |
+| `priority`          | string   | Default: `medium`. One of: `low`, `medium`, `high`, `urgent` |
+| `notes`             | text     | Optional. Freeform notes                               |
+| `created_at`        | datetime |                                                        |
+| `updated_at`        | datetime |                                                        |
+
+**Associations:**
+- `belongs_to :equipment`
+- `has_many :maintenance_logs` (dependent: destroy)
+- `has_many :supplies` (dependent: destroy)
+
+**Validations:**
+- `frequency_unit` must be one of: `days`, `weeks`, `months`, `years`
+- `priority` must be one of: `low`, `medium`, `high`, `urgent`
+
+**Scopes:**
+- `overdue` — `where("next_due_at < ?", Time.current)`
+- `due_soon` — `where(next_due_at: Time.current..7.days.from_now)`
+- `upcoming` — `where("next_due_at > ?", 7.days.from_now)`
+
+**Methods:**
+- `complete!(notes: nil)` — Creates a MaintenanceLog entry, sets `last_completed_at` to now, recalculates `next_due_at`, decrements associated supplies.
+- `due_status` — Returns `:overdue`, `:due_soon`, `:upcoming`, or `:not_scheduled`
+- `frequency_description` — Returns human-readable string like "Every 2 months"
+
+### 3.4 MaintenanceLog
+
+A record of a completed maintenance action. This is the history.
+
+| Column                | Type     | Notes                                    |
+|-----------------------|----------|------------------------------------------|
+| `id`                  | bigint   | Primary key                              |
+| `maintenance_task_id` | bigint   | Foreign key → MaintenanceTask. Required. |
+| `completed_at`        | datetime | Required. When the task was completed.   |
+| `notes`               | text     | Optional. E.g., "Used last spare filter" |
+| `created_at`          | datetime |                                          |
+| `updated_at`          | datetime |                                          |
+
+**Associations:** `belongs_to :maintenance_task`
+
+### 3.5 Supply
+
+Something consumed during maintenance — filters, parts, cleaning products, etc. Tracks inventory and provides purchase links for easy reordering.
+
+| Column                | Type     | Notes                                                   |
+|-----------------------|----------|---------------------------------------------------------|
+| `id`                  | bigint   | Primary key                                             |
+| `maintenance_task_id` | bigint   | Foreign key → MaintenanceTask. Required.                |
+| `name`                | string   | Required. E.g., "HVAC Filter 16x25x1"                  |
+| `purchase_url`        | string   | Optional. Direct link to buy (Amazon, Home Depot, etc.) |
+| `quantity_on_hand`    | integer  | Default: 0. How many spares are available.              |
+| `quantity_per_use`    | integer  | Default: 1. How many consumed per maintenance cycle.    |
+| `unit_price`          | decimal  | Optional. Price per unit for reference.                  |
+| `notes`               | text     | Optional. E.g., "Bought 2-pack, used 1"                |
+| `created_at`          | datetime |                                                         |
+| `updated_at`          | datetime |                                                         |
+
+**Associations:** `belongs_to :maintenance_task`
+
+**Methods:**
+- `low_stock?` — Returns `true` if `quantity_on_hand < quantity_per_use`
+- `decrement_stock!` — Reduces `quantity_on_hand` by `quantity_per_use` (floors at 0)
+
+---
+
+## 4. Web Dashboard
+
+The web app is **read-only** and **mobile-friendly**. No forms, no login.
+
+### 4.1 Home Dashboard — `GET /`
+
+The landing page shows an at-a-glance summary:
+
+**Overdue Tasks** (red/urgent section)
+- Lists all tasks where `next_due_at < now`, grouped by area
+- Each entry shows: task name, equipment name, area name, how overdue it is (e.g., "3 days overdue")
+
+**Due Soon** (yellow/attention section)
+- Tasks due within the next 7 days, grouped by area
+- Shows: task name, equipment, due date
+
+**Low Stock Supplies** (info section)
+- Supplies where `quantity_on_hand < quantity_per_use`
+- Shows: supply name, equipment/task it's for, quantity on hand, purchase link
+
+**Recently Completed** (optional, collapsed by default)
+- Last 10 completed maintenance logs
+- Shows: task name, completed date, notes
+
+### 4.2 Areas Index — `GET /areas`
+
+Grid or list of all areas with summary stats:
+- Area name and icon
+- Number of equipment items
+- Number of overdue/due soon tasks
+- Click through to area detail
+
+### 4.3 Area Detail — `GET /areas/:id`
+
+Shows all equipment in this area:
+- Equipment name, description
+- Task status summary (e.g., "2 overdue, 1 due soon, 3 upcoming")
+- Click through to equipment detail
+
+### 4.4 Equipment Detail — `GET /equipment/:id`
+
+Full view of a piece of equipment:
+- Equipment info (name, description, model number, manufacturer, purchase date, notes)
+- **Maintenance Tasks** — each task with:
+  - Name, priority badge, status badge (overdue/due soon/upcoming)
+  - Next due date
+  - Frequency description
+  - Click through to task detail
+- **Supplies** — table of supplies with name, quantity on hand, quantity per use, purchase link
+
+### 4.5 Task Detail — `GET /tasks/:id`
+
+Full view of a maintenance task:
+- Task name, priority, status, frequency
+- Next due date, last completed date
+- **Instructions** — full how-to text (can be multiple paragraphs)
+- **Supplies needed** — with quantities, stock status, purchase links
+- **History** — chronological list of MaintenanceLog entries (date + notes)
+
+### 4.6 Supplies Index — `GET /supplies`
+
+All supplies across all equipment, sortable/filterable:
+- Supply name
+- Equipment and task it belongs to
+- Quantity on hand / quantity per use
+- Low stock indicator
+- Purchase link (opens in new tab)
+
+### 4.7 JSON API
+
+Every route above also responds to `.json` format, returning the same data as JSON. This is for:
+- Future iOS app
+- Direct `curl` access
+- Claude Code API calls if needed
+
+---
+
+## 5. Conversational Management
+
+All write operations are performed through Claude Code conversations, using rake tasks or Rails console commands.
+
+### 5.1 Rake Tasks
+
+```
+rake upkeep:status
+```
+Prints a summary of overdue and due-soon tasks to the terminal.
+
+```
+rake upkeep:complete_task[TASK_ID]
+```
+Marks a task as completed: creates a MaintenanceLog, recalculates `next_due_at`, decrements supply inventory.
+
+```
+rake upkeep:add_equipment[AREA_NAME,EQUIPMENT_NAME]
+```
+Creates a new equipment record under the specified area (finds area by name).
+
+```
+rake upkeep:add_task[EQUIPMENT_ID,NAME,FREQ_VALUE,FREQ_UNIT]
+```
+Creates a new maintenance task for the given equipment.
+
+```
+rake upkeep:add_supply[TASK_ID,NAME,PURCHASE_URL,QUANTITY]
+```
+Adds a supply to a maintenance task.
+
+```
+rake upkeep:update_stock[SUPPLY_ID,QUANTITY]
+```
+Sets the `quantity_on_hand` for a supply.
+```
+
+### 5.2 Rails Console
+
+For anything not covered by rake tasks, Claude Code can use `rails console` to directly create or update records. Examples:
+
+```ruby
+# Add equipment with full details
+e = Equipment.create!(
+  area: Area.find_by!(name: "Bathroom"),
+  name: "Shower Head",
+  manufacturer: "AquaBliss",
+  notes: "Installed January 2025"
+)
+
+# Add a task with instructions
+t = MaintenanceTask.create!(
+  equipment: e,
+  name: "Replace filters",
+  frequency_value: 6,
+  frequency_unit: "months",
+  priority: "medium",
+  instructions: <<~INSTRUCTIONS
+    1. Unscrew the shower head from the hose
+    2. Remove the old sediment filter (white disc)
+    3. Remove the old carbon filter (black cylinder)
+    4. Insert new carbon filter first, then sediment filter
+    5. Screw shower head back on and run water for 30 seconds
+  INSTRUCTIONS
+)
+
+# Add supplies
+Supply.create!(
+  maintenance_task: t,
+  name: "Sediment Filter (SF100)",
+  purchase_url: "https://amazon.com/dp/EXAMPLE1",
+  quantity_on_hand: 1,
+  quantity_per_use: 1,
+  notes: "Bought 2-pack, used 1"
+)
+```
+
+### 5.3 JSON API
+
+All resources are available via JSON endpoints for programmatic access:
+
+- `GET /areas.json`
+- `GET /areas/:id.json`
+- `GET /equipment/:id.json`
+- `GET /tasks/:id.json`
+- `GET /supplies.json`
+- `POST /tasks/:id/complete.json` — mark a task complete (returns updated task)
+- Standard REST endpoints for creating/updating resources
+
+---
+
+## 6. Key Behaviors
+
+### Due Date Computation
+
+When a task is completed (via `complete!` method):
+
+1. `last_completed_at` is set to `Time.current`
+2. `next_due_at` is calculated as `Time.current + frequency_value.send(frequency_unit)`
+   - E.g., for "every 2 months": `Time.current + 2.months`
+3. A `MaintenanceLog` entry is created with the completion timestamp and optional notes
+4. Associated supplies are decremented
+
+### Supply Inventory Management
+
+- Each supply tracks `quantity_on_hand` and `quantity_per_use`
+- When a task is completed, each of its supplies is decremented: `quantity_on_hand -= quantity_per_use` (floors at 0)
+- Supplies where `quantity_on_hand < quantity_per_use` are flagged as "low stock" on the dashboard
+- Purchase links open directly in a new browser tab for one-click reordering
+
+### Status Categories
+
+Tasks are categorized by their `next_due_at` relative to now:
+
+| Status       | Condition                              | Display    |
+|--------------|----------------------------------------|------------|
+| `overdue`    | `next_due_at` is in the past           | Red badge  |
+| `due_soon`   | `next_due_at` is within 7 days         | Yellow badge|
+| `upcoming`   | `next_due_at` is more than 7 days away | Green badge|
+| `not_scheduled` | `next_due_at` is null (never completed, no initial date set) | Gray badge |
+
+---
+
+## 7. Deployment
+
+### Platform: Railway
+
+- **Source:** GitHub repository, auto-deploy on push to `main`
+- **Database:** Railway PostgreSQL addon
+- **URL:** Railway-provided subdomain (e.g., `upkeep-production.up.railway.app`)
+- **No custom domain needed**
+- **No authentication needed**
+
+### Environment Variables
+
+| Variable         | Purpose                    |
+|------------------|----------------------------|
+| `DATABASE_URL`   | PostgreSQL connection (set by Railway) |
+| `RAILS_ENV`      | `production`               |
+| `SECRET_KEY_BASE`| Rails secret (generate and set in Railway) |
+
+### Deployment Files
+
+- `Procfile` — defines web process (`web: bin/rails server`)
+- `config/database.yml` — uses `DATABASE_URL` in production
+- `bin/docker-entrypoint` or `Dockerfile` if Railway needs it (Railway supports both buildpacks and Docker)
+
+---
+
+## 8. Future Enhancements
+
+These are documented for future reference but are **not part of the MVP**:
+
+- **User authentication** — Devise or custom auth, multi-user households with task assignment
+- **Native iOS app** — Separate repository, Swift/SwiftUI, consumes the JSON API
+- **Photo attachments** — Active Storage for photos of equipment, issues, completed work
+- **Email/push notifications** — Alerts when tasks become overdue or due soon
+- **Cost tracking** — Track actual costs per maintenance, annual reports
+- **Calendar view** — Visual calendar showing upcoming maintenance
+- **Admin web forms** — If conversational management proves insufficient for some workflows
+
+---
+
+## 9. Development Setup
+
+### Prerequisites
+
+- Ruby 3.3+
+- Rails 8
+- PostgreSQL (running locally)
+- Node.js (for Tailwind CSS build)
+
+### Getting Started
+
+```bash
+# Clone the repo
+git clone <repo-url> ~/Code/upkeep
+cd ~/Code/upkeep
+
+# Install dependencies
+bundle install
+
+# Create and migrate database
+bin/rails db:create db:migrate db:seed
+
+# Start the server
+bin/dev
+```
+
+### Seed Data
+
+The seed file (`db/seeds.rb`) creates the predefined areas:
+
+- Kitchen, Bathroom, Bedroom, Living Room, Outdoor, Garage, Basement, Attic, Studio, Whole House
+
+No equipment or tasks are seeded — those are added through conversations.
+
+### Running Tests
+
+```bash
+bin/rails test
+```

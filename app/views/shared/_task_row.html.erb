@@ -1,0 +1,23 @@
+<div class="flex items-center justify-between py-3 border-b border-gray-100 last:border-0">
+  <div class="min-w-0 flex-1">
+    <%= link_to maintenance_task_path(task), class: "block hover:bg-gray-50 -mx-2 px-2 py-1 rounded" do %>
+      <div class="flex items-center gap-2 flex-wrap">
+        <span class="font-medium text-gray-900 text-sm"><%= task.name %></span>
+        <%= status_badge(task.due_status) %>
+        <%= priority_badge(task.priority) %>
+      </div>
+      <div class="text-xs text-gray-500 mt-0.5">
+        <% if show_location.present? %>
+          <%= task.equipment.area.icon %> <%= task.equipment.area.name %> &rsaquo; <%= task.equipment.name %> &middot;
+        <% end %>
+        <%= task.frequency_description %>
+        <% if task.next_due_at.present? %>
+          &middot; Due <%= task.next_due_at.strftime("%b %d, %Y") %>
+          <% if task.due_status == :overdue %>
+            <span class="text-red-600 font-medium">(<%= task.overdue_by %> overdue)</span>
+          <% end %>
+        <% end %>
+      </div>
+    <% end %>
+  </div>
+</div>

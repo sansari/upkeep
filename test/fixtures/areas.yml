@@ -1,0 +1,11 @@
+kitchen:
+  name: Kitchen
+  icon: "🍳"
+  is_default: true
+  position: 1
+
+bathroom:
+  name: Bathroom
+  icon: "🚿"
+  is_default: true
+  position: 2

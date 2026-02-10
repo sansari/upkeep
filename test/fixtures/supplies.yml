@@ -1,0 +1,12 @@
+water_filter_cartridge:
+  maintenance_task: replace_water_filter
+  name: Aquasana Replacement Cartridge
+  purchase_url: https://example.com/filter
+  quantity_on_hand: 0
+  quantity_per_use: 1
+
+shower_carbon_filter:
+  maintenance_task: replace_shower_filter
+  name: Carbon Filter
+  quantity_on_hand: 2
+  quantity_per_use: 1

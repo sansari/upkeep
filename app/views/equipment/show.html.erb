@@ -1,0 +1,85 @@
+<% content_for(:title) { "#{@equipment.name} — Upkeep" } %>
+
+<div class="space-y-6">
+  <div class="flex items-center gap-2">
+    <%= link_to "← #{@equipment.area.name}", area_path(@equipment.area), class: "text-sm text-gray-500 hover:text-gray-700" %>
+  </div>
+
+  <div>
+    <h1 class="text-2xl font-bold text-gray-900"><%= @equipment.name %></h1>
+    <p class="text-sm text-gray-500"><%= @equipment.area.icon %> <%= @equipment.area.name %></p>
+  </div>
+
+  <% if @equipment.description.present? || @equipment.model_number.present? || @equipment.manufacturer.present? %>
+    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+      <% if @equipment.description.present? %>
+        <p class="text-sm text-gray-700"><%= @equipment.description %></p>
+      <% end %>
+      <div class="flex flex-wrap gap-4 mt-2 text-xs text-gray-500">
+        <% if @equipment.manufacturer.present? %>
+          <span>Manufacturer: <strong><%= @equipment.manufacturer %></strong></span>
+        <% end %>
+        <% if @equipment.model_number.present? %>
+          <span>Model: <strong><%= @equipment.model_number %></strong></span>
+        <% end %>
+        <% if @equipment.purchase_date.present? %>
+          <span>Purchased: <strong><%= @equipment.purchase_date.strftime("%b %Y") %></strong></span>
+        <% end %>
+      </div>
+      <% if @equipment.notes.present? %>
+        <p class="text-xs text-gray-500 mt-2"><%= @equipment.notes %></p>
+      <% end %>
+    </div>
+  <% end %>
+
+  <section>
+    <h2 class="text-lg font-semibold text-gray-900 mb-3">Maintenance Tasks</h2>
+    <% if @equipment.maintenance_tasks.any? %>
+      <div class="bg-white rounded-lg shadow-sm border border-gray-200 px-4">
+        <% @equipment.maintenance_tasks.by_urgency.each do |task| %>
+          <%= render "shared/task_row", task: task, show_location: false %>
+        <% end %>
+      </div>
+    <% else %>
+      <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 text-center">
+        <p class="text-gray-500 text-sm">No maintenance tasks yet.</p>
+      </div>
+    <% end %>
+  </section>
+
+  <% supplies = @equipment.maintenance_tasks.flat_map(&:supplies) %>
+  <% if supplies.any? %>
+    <section>
+      <h2 class="text-lg font-semibold text-gray-900 mb-3">Supplies</h2>
+      <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+        <table class="min-w-full divide-y divide-gray-200">
+          <thead class="bg-gray-50">
+            <tr>
+              <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Supply</th>
+              <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">For Task</th>
+              <th class="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase">Stock</th>
+              <th class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">Buy</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-gray-100">
+            <% supplies.each do |supply| %>
+              <tr>
+                <td class="px-4 py-2 text-sm text-gray-900">
+                  <%= supply.name %>
+                  <%= stock_badge(supply) %>
+                </td>
+                <td class="px-4 py-2 text-sm text-gray-500"><%= supply.maintenance_task.name %></td>
+                <td class="px-4 py-2 text-sm text-gray-700 text-center"><%= supply.quantity_on_hand %>/<%= supply.quantity_per_use %></td>
+                <td class="px-4 py-2 text-sm text-right">
+                  <% if supply.purchase_url.present? %>
+                    <%= link_to "Buy →", supply.purchase_url, target: "_blank", rel: "noopener", class: "text-blue-600 hover:text-blue-800 text-xs font-medium" %>
+                  <% end %>
+                </td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  <% end %>
+</div>
