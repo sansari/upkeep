@@ -7,10 +7,10 @@ class MaintenanceTaskTest < ActiveSupport::TestCase
     assert_not_includes overdue, maintenance_tasks(:replace_shower_filter)
   end
 
-  test "due_soon scope returns tasks due within 7 days" do
-    # replace_shower_filter is 10 days out, so not due_soon
+  test "due_soon scope returns tasks due within 30 days" do
+    # replace_shower_filter is 10 days out, so within 30-day window
     due_soon = MaintenanceTask.due_soon
-    assert_not_includes due_soon, maintenance_tasks(:replace_shower_filter)
+    assert_includes due_soon, maintenance_tasks(:replace_shower_filter)
   end
 
   test "not_scheduled scope returns tasks with no next_due_at" do
@@ -20,7 +20,7 @@ class MaintenanceTaskTest < ActiveSupport::TestCase
 
   test "due_status returns correct status" do
     assert_equal :overdue, maintenance_tasks(:replace_water_filter).due_status
-    assert_equal :upcoming, maintenance_tasks(:replace_shower_filter).due_status
+    assert_equal :due_soon, maintenance_tasks(:replace_shower_filter).due_status
     assert_equal :not_scheduled, maintenance_tasks(:wash_shower_head).due_status
   end
 

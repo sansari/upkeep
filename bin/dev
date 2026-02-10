@@ -1,4 +1,7 @@
-#!/usr/bin/env sh
+#!/usr/bin/env bash
+
+# Ensure rbenv is loaded
+eval "$(rbenv init - bash)" 2>/dev/null
 
 if ! gem list foreman -i --silent; then
   echo "Installing foreman..."

@@ -9,6 +9,7 @@ Rails.application.routes.draw do
     end
   end
   resources :supplies, only: [ :index ]
+  get "log" => "maintenance_logs#index", as: :log
 
   get "up" => "rails/health#show", as: :rails_health_check
 end

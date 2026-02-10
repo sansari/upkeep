@@ -1,0 +1,35 @@
+<% content_for(:title) { "Log — Upkeep" } %>
+
+<div class="space-y-6">
+  <h1 class="text-2xl font-bold text-gray-900">Log</h1>
+
+  <% if @logs.any? %>
+    <div class="bg-white rounded-lg shadow-sm border border-gray-200 divide-y divide-gray-100">
+      <% @logs.each do |log| %>
+        <div class="px-4 py-3">
+          <div class="flex items-center justify-between">
+            <div>
+              <%= link_to maintenance_task_path(log.maintenance_task), class: "hover:text-blue-600" do %>
+                <span class="text-sm font-medium text-gray-900"><%= log.maintenance_task.name %></span>
+              <% end %>
+              <div class="text-xs text-gray-500 mt-0.5">
+                <%= log.maintenance_task.equipment.area.icon %> <%= log.maintenance_task.equipment.area.name %> &rsaquo; <%= log.maintenance_task.equipment.name %>
+              </div>
+            </div>
+            <div class="text-right">
+              <div class="text-sm text-gray-700"><%= log.completed_at.strftime("%b %d, %Y") %></div>
+              <div class="text-xs text-gray-400"><%= time_ago_in_words(log.completed_at) %> ago</div>
+            </div>
+          </div>
+          <% if log.notes.present? %>
+            <p class="text-sm text-gray-600 mt-1"><%= log.notes %></p>
+          <% end %>
+        </div>
+      <% end %>
+    </div>
+  <% else %>
+    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-8 text-center">
+      <p class="text-gray-500">No maintenance completed yet.</p>
+    </div>
+  <% end %>
+</div>

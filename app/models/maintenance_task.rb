@@ -11,8 +11,8 @@ class MaintenanceTask < ApplicationRecord
   validates :priority, presence: true, inclusion: { in: %w[low medium high urgent] }
 
   scope :overdue, -> { where("next_due_at < ?", Time.current) }
-  scope :due_soon, -> { where(next_due_at: Time.current..7.days.from_now) }
-  scope :upcoming, -> { where("next_due_at > ?", 7.days.from_now) }
+  scope :due_soon, -> { where(next_due_at: Time.current..14.days.from_now) }
+  scope :upcoming, -> { where("next_due_at > ?", 14.days.from_now) }
   scope :not_scheduled, -> { where(next_due_at: nil) }
   scope :by_urgency, -> { order(Arel.sql("CASE WHEN next_due_at IS NULL THEN 1 ELSE 0 END, next_due_at ASC")) }
 
@@ -30,7 +30,7 @@ class MaintenanceTask < ApplicationRecord
   def due_status
     return :not_scheduled if next_due_at.nil?
     return :overdue if next_due_at < Time.current
-    return :due_soon if next_due_at <= 7.days.from_now
+    return :due_soon if next_due_at <= 14.days.from_now
     :upcoming
   end
 

@@ -19,23 +19,10 @@
   <% if @due_soon_tasks.any? %>
     <section class="bg-white rounded-lg shadow-sm border border-yellow-200">
       <div class="px-4 py-3 border-b border-yellow-100 bg-yellow-50 rounded-t-lg">
-        <h2 class="text-sm font-semibold text-yellow-800">🟡 Due Soon (<%= @due_soon_tasks.count %>)</h2>
+        <h2 class="text-sm font-semibold text-yellow-800">🟡 Due Within 2 Weeks (<%= @due_soon_tasks.count %>)</h2>
       </div>
       <div class="px-4">
         <% @due_soon_tasks.each do |task| %>
-          <%= render "shared/task_row", task: task, show_location: true %>
-        <% end %>
-      </div>
-    </section>
-  <% end %>
-
-  <% if @not_scheduled_tasks.any? %>
-    <section class="bg-white rounded-lg shadow-sm border border-gray-200">
-      <div class="px-4 py-3 border-b border-gray-100 bg-gray-50 rounded-t-lg">
-        <h2 class="text-sm font-semibold text-gray-600">⚪ Not Yet Scheduled (<%= @not_scheduled_tasks.count %>)</h2>
-      </div>
-      <div class="px-4">
-        <% @not_scheduled_tasks.each do |task| %>
           <%= render "shared/task_row", task: task, show_location: true %>
         <% end %>
       </div>
@@ -68,10 +55,16 @@
     </section>
   <% end %>
 
-  <% if @overdue_tasks.empty? && @due_soon_tasks.empty? && @not_scheduled_tasks.empty? && @low_stock_supplies.empty? %>
+  <% if @all_clear %>
     <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-8 text-center">
-      <p class="text-gray-500 text-lg">✅ Everything is up to date!</p>
-      <p class="text-gray-400 text-sm mt-1">No overdue tasks or low stock supplies.</p>
+      <p class="text-gray-700 text-xl font-medium mb-1">Nothing to do. Relax.</p>
+      <p class="text-gray-400 text-sm mb-6">Everything is taken care of. Enjoy this cat.</p>
+      <div class="flex justify-center">
+        <img src="https://cataas.com/cat/gif?t=<%= Time.current.to_i %>"
+             alt="A random cat gif"
+             class="rounded-lg max-w-sm w-full shadow-md"
+             loading="lazy" />
+      </div>
     </div>
   <% end %>
 </div>
