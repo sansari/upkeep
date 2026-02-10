@@ -3,8 +3,19 @@
 # If running the rails server then create or migrate existing database
 if [ "${@: -2:1}" == "./bin/rails" ] && [ "${@: -1:1}" == "server" ]; then
   ./bin/rails db:prepare
-  ./bin/rails db:prepare:queue
-  ./bin/rails db:prepare:cache
+
+  # Solid Queue and Solid Cache share the primary database on Railway.
+  # Load their schemas if their tables don't exist yet.
+  ./bin/rails runner "
+    unless ActiveRecord::Base.connection.table_exists?('solid_queue_jobs')
+      puts 'Loading Solid Queue schema...'
+      load Rails.root.join('db/queue_schema.rb')
+    end
+    unless ActiveRecord::Base.connection.table_exists?('solid_cache_entries')
+      puts 'Loading Solid Cache schema...'
+      load Rails.root.join('db/cache_schema.rb')
+    end
+  "
 fi
 
 exec "${@}"
