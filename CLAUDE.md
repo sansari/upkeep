@@ -59,6 +59,8 @@ curl -s -o /dev/null -w "%{http_code}" https://upkeep-web-production.up.railway.
 ```
 
 ### Production Data
+**Never lose production data.** Always verify that migrations are additive (CREATE TABLE, ADD COLUMN) before deploying. Never run destructive SQL (DROP, TRUNCATE, DELETE without WHERE) against production. When in doubt, ask first.
+
 To update production data directly (e.g., marking tasks complete, adding equipment):
 ```bash
 # Use the public DATABASE_URL for psql access
