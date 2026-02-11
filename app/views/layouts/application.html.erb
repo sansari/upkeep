@@ -20,7 +20,7 @@
     <%= javascript_importmap_tags %>
   </head>
 
-  <body class="h-full" data-controller="badge">
+  <body class="h-full" data-controller="badge" data-badge-vapid-public-key-value="<%= Rails.application.credentials.vapid[:public_key] %>">
     <nav class="bg-white shadow-sm border-b border-gray-200">
       <div class="max-w-5xl mx-auto px-4 sm:px-6">
         <div class="flex justify-between h-14">

@@ -18,7 +18,8 @@ Notes for Claude Code sessions working on this project.
 - Propshaft asset pipeline, importmap-rails
 - Solid Queue + Solid Cache (sharing the primary database)
 - Minitest for testing
-- PWA with service worker and app badge support
+- PWA with service worker, app badge, and Web Push notifications
+- `web-push` gem for VAPID-based push notifications
 
 ## Key Conventions
 
@@ -78,25 +79,30 @@ app/
     maintenance_tasks_controller.rb
     maintenance_logs_controller.rb  # Log page
     supplies_controller.rb
+    push_subscriptions_controller.rb  # Web Push subscription management
   models/
     area.rb                    # has_many :equipment
     equipment.rb               # belongs_to :area, has_many :maintenance_tasks
     maintenance_task.rb        # Core model — scopes, complete!, due_status
     maintenance_log.rb         # Completion records
     supply.rb                  # Inventory tracking with low_stock?
+    push_subscription.rb       # Web Push subscription (endpoint, keys)
   views/
     layouts/application.html.erb  # Nav, badge controller, permission banner
     dashboard/index.html.erb      # Main dashboard view
     pwa/
       manifest.json.erb           # PWA manifest
-      service-worker.js           # Minimal service worker
+      service-worker.js           # Service worker with push handlers
   javascript/
     controllers/
-      badge_controller.js         # PWA badge + notification permission
+      badge_controller.js         # PWA badge + push subscription
+  jobs/
+    badge_notification_job.rb   # Recurring job: push badge count changes
 lib/tasks/
   upkeep.rake                     # Rake tasks for data management
 config/
   routes.rb                       # Includes PWA routes
+  recurring.yml                   # Solid Queue recurring jobs
   database.yml                    # Production uses DATABASE_URL for all databases
 db/
   seeds.rb                        # Default areas (10, but 3 were removed from DB)
@@ -115,6 +121,7 @@ CLAUDE.md                         # This file — agent instructions
 - **Services**: upkeep-web (Rails app) + Postgres
 - **URL**: https://upkeep-web-production.up.railway.app
 - **Environment variables**: RAILS_MASTER_KEY, RAILS_ENV=production, SOLID_QUEUE_IN_PUMA=1, DATABASE_URL (auto-set)
+- **VAPID keys** for Web Push are stored in Rails credentials (encrypted), not env vars
 - **Docker entrypoint** loads Solid Queue/Cache schemas into the shared database on first boot
 - **Dockerfile** uses Puma directly (not Thruster) to work with Railway's dynamic PORT
 

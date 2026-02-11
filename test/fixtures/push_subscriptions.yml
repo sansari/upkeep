@@ -1,0 +1,9 @@
+one:
+  endpoint: "https://push.example.com/sub/1"
+  p256dh: "test_p256dh_key_1"
+  auth: "test_auth_1"
+
+two:
+  endpoint: "https://push.example.com/sub/2"
+  p256dh: "test_p256dh_key_2"
+  auth: "test_auth_2"
