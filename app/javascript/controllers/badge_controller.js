@@ -5,7 +5,8 @@ import { Controller } from "@hotwired/stimulus"
 export default class extends Controller {
   static targets = ["permissionBanner"]
   static values = {
-    pollInterval: { type: Number, default: 300000 } // 5 minutes
+    pollInterval: { type: Number, default: 300000 }, // 5 minutes
+    vapidPublicKey: String
   }
 
   connect() {
@@ -27,7 +28,7 @@ export default class extends Controller {
     if (!("serviceWorker" in navigator)) return
 
     try {
-      await navigator.serviceWorker.register("/service-worker", { scope: "/" })
+      this.swRegistration = await navigator.serviceWorker.register("/service-worker", { scope: "/" })
     } catch (error) {
       console.warn("Service worker registration failed:", error)
     }
@@ -72,8 +73,13 @@ export default class extends Controller {
   async requestPermission() {
     if (typeof Notification === "undefined") return
 
-    await Notification.requestPermission()
+    const result = await Notification.requestPermission()
     this.dismissBanner()
+
+    if (result === "granted") {
+      await this.subscribeToPush()
+    }
+
     this.updateBadge()
   }
 
@@ -82,6 +88,55 @@ export default class extends Controller {
     if (this.hasPermissionBannerTarget) {
       this.permissionBannerTarget.style.display = "none"
     }
+  }
+
+  // --- Push Subscription ---
+
+  async subscribeToPush() {
+    if (!this.swRegistration) return
+    if (!this.hasVapidPublicKeyValue) return
+
+    try {
+      const existingSub = await this.swRegistration.pushManager.getSubscription()
+      if (existingSub) return // already subscribed
+
+      const applicationServerKey = this.urlBase64ToUint8Array(this.vapidPublicKeyValue)
+      const subscription = await this.swRegistration.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey
+      })
+
+      await this.sendSubscriptionToServer(subscription)
+    } catch (error) {
+      console.warn("Push subscription failed:", error)
+    }
+  }
+
+  async sendSubscriptionToServer(subscription) {
+    const data = subscription.toJSON()
+
+    await fetch("/push_subscriptions", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        endpoint: data.endpoint,
+        keys: {
+          p256dh: data.keys.p256dh,
+          auth: data.keys.auth
+        }
+      })
+    })
+  }
+
+  urlBase64ToUint8Array(base64String) {
+    const padding = "=".repeat((4 - base64String.length % 4) % 4)
+    const base64 = (base64String + padding).replace(/-/g, "+").replace(/_/g, "/")
+    const rawData = atob(base64)
+    const outputArray = new Uint8Array(rawData.length)
+    for (let i = 0; i < rawData.length; ++i) {
+      outputArray[i] = rawData.charCodeAt(i)
+    }
+    return outputArray
   }
 
   // --- Polling ---

@@ -417,7 +417,15 @@ The app is a Progressive Web App that can be added to the iOS/Android home scree
 - Badge count = number of overdue + due_soon tasks
 - Updates on page load, every 5 minutes, and on `visibilitychange`
 - Requires notification permission on iOS (one-time permission banner shown)
-- Badge only updates while the app is open (no server-side push notifications)
+
+### Web Push Notifications
+- Server-side push via `web-push` gem with VAPID authentication
+- After granting notification permission, the browser subscribes to push and sends the subscription to `POST /push_subscriptions`
+- `BadgeNotificationJob` runs every 12 hours via Solid Queue recurring schedule
+- Sends push notification when overdue + due_soon task count changes
+- Service worker receives push, shows notification, and updates app badge — even when app is closed
+- Job retries 3 times on failure, then sends a failure notification via push
+- Expired/invalid subscriptions are automatically cleaned up
 
 ---
 

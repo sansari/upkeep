@@ -2,6 +2,18 @@
 
 All notable changes to Upkeep are documented here.
 
+## 2026-02-10 — Web Push Badge Notifications
+
+Plan: [plans/007-web-push-badge-notifications.md](plans/007-web-push-badge-notifications.md)
+
+- Added server-side Web Push notifications using VAPID authentication (`web-push` gem)
+- New `PushSubscription` model stores browser push subscriptions
+- Badge controller now subscribes to push after notification permission is granted
+- Service worker handles `push` events to show notifications and update the app badge
+- `BadgeNotificationJob` runs every 12 hours, sends push when overdue/due_soon count changes
+- Job retries 3 times on failure, then self-reports via push notification
+- Existing client-side polling kept as complementary mechanism
+
 ## 2026-02-10 — Documentation Workflow
 
 Plan: [plans/006-documentation-workflow.md](plans/006-documentation-workflow.md)

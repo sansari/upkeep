@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_02_10_073735) do
+ActiveRecord::Schema[8.1].define(version: 2026_02_11_001244) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -61,6 +61,15 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_10_073735) do
     t.index ["equipment_id"], name: "index_maintenance_tasks_on_equipment_id"
     t.index ["next_due_at"], name: "index_maintenance_tasks_on_next_due_at"
     t.index ["priority"], name: "index_maintenance_tasks_on_priority"
+  end
+
+  create_table "push_subscriptions", force: :cascade do |t|
+    t.string "auth", null: false
+    t.datetime "created_at", null: false
+    t.text "endpoint", null: false
+    t.string "p256dh", null: false
+    t.datetime "updated_at", null: false
+    t.index ["endpoint"], name: "index_push_subscriptions_on_endpoint", unique: true
   end
 
   create_table "supplies", force: :cascade do |t|
