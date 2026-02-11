@@ -58,17 +58,27 @@ railway service status  # should show SUCCESS
 curl -s -o /dev/null -w "%{http_code}" https://upkeep-web-production.up.railway.app/up  # should be 200
 ```
 
-### Production Data
+### Production Data & Commands
 **Never lose production data.** Always verify that migrations are additive (CREATE TABLE, ADD COLUMN) before deploying. Never run destructive SQL (DROP, TRUNCATE, DELETE without WHERE) against production. When in doubt, ask first.
 
-To update production data directly (e.g., marking tasks complete, adding equipment):
+Railway has no SSH or remote console. `railway run` doesn't work because it spawns a bare subprocess that skips the shell profile, so rbenv never loads and macOS system Ruby is used instead.
+
+**To run Rails commands against production**, use local Ruby with the production DATABASE_URL:
 ```bash
-# Use the public DATABASE_URL for psql access
-PROD_DB_URL="postgresql://postgres:dNVJUrdIWOCWHsVCkgmvehjCtXGiuFTf@ballast.proxy.rlwy.net:49051/railway"
-psql "$PROD_DB_URL" -c "SQL HERE"
+source ~/.zshrc && DATABASE_URL="postgresql://postgres:dNVJUrdIWOCWHsVCkgmvehjCtXGiuFTf@ballast.proxy.rlwy.net:49051/railway" bin/rails runner "RUBY CODE"
 ```
 
-`railway run` doesn't work well locally because it uses the system Ruby 2.6 instead of rbenv.
+**For rake tasks against production:**
+```bash
+source ~/.zshrc && DATABASE_URL="postgresql://postgres:dNVJUrdIWOCWHsVCkgmvehjCtXGiuFTf@ballast.proxy.rlwy.net:49051/railway" bin/rails upkeep:status
+```
+
+**For raw SQL:**
+```bash
+source ~/.zshrc && psql "postgresql://postgres:dNVJUrdIWOCWHsVCkgmvehjCtXGiuFTf@ballast.proxy.rlwy.net:49051/railway" -c "SQL HERE"
+```
+
+For complex Ruby scripts, write to `tmp/` and run with `bin/rails runner tmp/scriptname.rb` (with the DATABASE_URL prefix) to avoid shell quoting issues.
 
 ## File Structure (Key Files)
 
