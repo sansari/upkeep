@@ -100,6 +100,13 @@ config/
   database.yml                    # Production uses DATABASE_URL for all databases
 db/
   seeds.rb                        # Default areas (10, but 3 were removed from DB)
+plans/
+  001-initial-build.md            # Plan for each major feature/change
+  002-data-entry.md
+  ...
+SPEC.md                           # Full app specification (keep in sync!)
+CHANGELOG.md                      # All notable changes with plan references
+CLAUDE.md                         # This file — agent instructions
 ```
 
 ## Railway Setup
@@ -111,9 +118,26 @@ db/
 - **Docker entrypoint** loads Solid Queue/Cache schemas into the shared database on first boot
 - **Dockerfile** uses Puma directly (not Thruster) to work with Railway's dynamic PORT
 
-## Changelog
+## Documentation Workflow
 
-See [CHANGELOG.md](CHANGELOG.md) for a log of all major changes.
+Every functional change must update **all three** of these:
 
-- **Always update CHANGELOG.md** when making major changes (new features, significant bug fixes, architectural changes, dependency updates, etc.)
-- If a plan was created before implementation, reference it in the changelog entry (e.g., "per plan in conversation" or link to relevant context)
+### 1. Plans → `plans/NNN-short-name.md`
+- Before implementing non-trivial features, write a plan file
+- Plans are numbered sequentially (001, 002, ...)
+- Include: context/motivation, approach, files modified, verification steps
+- **Commit the plan with the feature** — plans are part of the repo
+
+### 2. Changelog → `CHANGELOG.md`
+- Update after every functional change
+- Each entry references its plan: `Plan: [plans/NNN-name.md](plans/NNN-name.md)`
+- Reverse chronological order
+
+### 3. Spec → `SPEC.md`
+- Update after every functional change to reflect current app behavior
+- The spec should always describe the **current** state of the app, not the original design
+- Key sections to keep in sync: dashboard behavior, routes, scopes, deployment config
+
+### 4. This file → `CLAUDE.md`
+- Update with new conventions, file structure changes, or workflow notes
+- This is what future Claude Code sessions read first
