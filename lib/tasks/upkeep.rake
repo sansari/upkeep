@@ -98,6 +98,34 @@ namespace :upkeep do
     puts "   On hand: #{supply.quantity_on_hand}"
   end
 
+  desc "Send a test push notification to all subscribers"
+  task test_push: :environment do
+    vapid = Rails.application.credentials.vapid
+    abort "No VAPID keys configured" unless vapid
+
+    subs = PushSubscription.all
+    abort "No push subscriptions found" if subs.empty?
+
+    payload = { count: 1, message: "Test push from Upkeep" }.to_json
+
+    subs.each do |sub|
+      WebPush.payload_send(
+        message: payload,
+        endpoint: sub.endpoint,
+        p256dh: sub.p256dh,
+        auth: sub.auth,
+        vapid: {
+          public_key: vapid[:public_key],
+          private_key: vapid[:private_key],
+          subject: vapid[:subject]
+        }
+      )
+      puts "Sent to subscription ##{sub.id}"
+    rescue WebPush::Error => e
+      puts "Failed for subscription ##{sub.id}: #{e.message}"
+    end
+  end
+
   desc "Update stock quantity for a supply"
   task :update_stock, [:supply_id, :quantity] => :environment do |_t, args|
     supply = Supply.find(args[:supply_id])
