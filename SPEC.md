@@ -116,8 +116,8 @@ A recurring (or one-time) maintenance action for a piece of equipment.
 
 **Scopes:**
 - `overdue` — `where("next_due_at < ?", Time.current)`
-- `due_soon` — `where(next_due_at: Time.current..7.days.from_now)`
-- `upcoming` — `where("next_due_at > ?", 7.days.from_now)`
+- `due_soon` — `where(next_due_at: Time.current..14.days.from_now)`
+- `upcoming` — `where("next_due_at > ?", 14.days.from_now)`
 
 **Methods:**
 - `complete!(notes: nil)` — Creates a MaintenanceLog entry, sets `last_completed_at` to now, recalculates `next_due_at`, decrements associated supplies.
@@ -170,23 +170,24 @@ The web app is **read-only** and **mobile-friendly**. No forms, no login.
 
 ### 4.1 Home Dashboard — `GET /`
 
-The landing page shows an at-a-glance summary:
+The landing page shows an at-a-glance summary of what needs attention within the next **2 weeks**:
 
 **Overdue Tasks** (red/urgent section)
-- Lists all tasks where `next_due_at < now`, grouped by area
+- Lists all tasks where `next_due_at < now`
 - Each entry shows: task name, equipment name, area name, how overdue it is (e.g., "3 days overdue")
 
-**Due Soon** (yellow/attention section)
-- Tasks due within the next 7 days, grouped by area
+**Due Within 2 Weeks** (yellow/attention section)
+- Tasks due within the next 14 days
 - Shows: task name, equipment, due date
 
-**Low Stock Supplies** (info section)
-- Supplies where `quantity_on_hand < quantity_per_use`
+**Low Stock Supplies** (orange section)
+- Only shown when the associated task is overdue or due within 2 weeks
 - Shows: supply name, equipment/task it's for, quantity on hand, purchase link
 
-**Recently Completed** (optional, collapsed by default)
-- Last 10 completed maintenance logs
-- Shows: task name, completed date, notes
+**All Clear State**
+- When no tasks are overdue, due soon, or have low stock supplies: shows "Nothing to do. Relax." with a random cat gif from `https://cataas.com/cat/gif`
+
+**Note:** "Not Yet Scheduled" tasks (where `next_due_at` is null) are intentionally hidden from the dashboard.
 
 ### 4.2 Areas Index — `GET /areas`
 
@@ -232,7 +233,14 @@ All supplies across all equipment, sortable/filterable:
 - Low stock indicator
 - Purchase link (opens in new tab)
 
-### 4.7 JSON API
+### 4.7 Maintenance Log — `GET /log`
+
+Reverse-chronological list of all completed maintenance tasks:
+- Task name and location (equipment → area)
+- Completion date and time ago
+- Notes (if any)
+
+### 4.8 JSON API
 
 Every route above also responds to `.json` format, returning the same data as JSON. This is for:
 - Future iOS app
@@ -355,12 +363,12 @@ When a task is completed (via `complete!` method):
 
 Tasks are categorized by their `next_due_at` relative to now:
 
-| Status       | Condition                              | Display    |
-|--------------|----------------------------------------|------------|
-| `overdue`    | `next_due_at` is in the past           | Red badge  |
-| `due_soon`   | `next_due_at` is within 7 days         | Yellow badge|
-| `upcoming`   | `next_due_at` is more than 7 days away | Green badge|
-| `not_scheduled` | `next_due_at` is null (never completed, no initial date set) | Gray badge |
+| Status       | Condition                               | Display    |
+|--------------|-----------------------------------------|------------|
+| `overdue`    | `next_due_at` is in the past            | Red badge  |
+| `due_soon`   | `next_due_at` is within 14 days         | Yellow badge|
+| `upcoming`   | `next_due_at` is more than 14 days away | Green badge|
+| `not_scheduled` | `next_due_at` is null (never completed, no initial date set) | Gray badge (hidden from dashboard) |
 
 ---
 
@@ -368,31 +376,54 @@ Tasks are categorized by their `next_due_at` relative to now:
 
 ### Platform: Railway
 
-- **Source:** GitHub repository, auto-deploy on push to `main`
-- **Database:** Railway PostgreSQL addon
-- **URL:** Railway-provided subdomain (e.g., `upkeep-production.up.railway.app`)
+- **Source:** GitHub repository (`sansari/upkeep`), deploy via `railway up`
+- **Database:** Railway PostgreSQL addon (single database shared by primary, Solid Cache, Solid Queue)
+- **URL:** https://upkeep-web-production.up.railway.app
 - **No custom domain needed**
 - **No authentication needed**
 
 ### Environment Variables
 
-| Variable         | Purpose                    |
-|------------------|----------------------------|
-| `DATABASE_URL`   | PostgreSQL connection (set by Railway) |
-| `RAILS_ENV`      | `production`               |
-| `SECRET_KEY_BASE`| Rails secret (generate and set in Railway) |
+| Variable              | Purpose                                      |
+|-----------------------|----------------------------------------------|
+| `DATABASE_URL`        | PostgreSQL connection (auto-set by Railway)   |
+| `RAILS_ENV`           | `production`                                  |
+| `RAILS_MASTER_KEY`    | Decrypts `config/credentials.yml.enc`        |
+| `SOLID_QUEUE_IN_PUMA` | `1` — runs Solid Queue inside Puma process   |
 
 ### Deployment Files
 
-- `Procfile` — defines web process (`web: bin/rails server`)
-- `config/database.yml` — uses `DATABASE_URL` in production
-- `bin/docker-entrypoint` or `Dockerfile` if Railway needs it (Railway supports both buildpacks and Docker)
+- `Dockerfile` — multi-stage build, Ruby 3.3.7-slim, Puma on dynamic PORT
+- `bin/docker-entrypoint` — runs `db:prepare` + loads Solid Queue/Cache schemas
+- `config/database.yml` — production uses `DATABASE_URL` for all three database roles
 
 ---
 
-## 8. Future Enhancements
+## 8. PWA Support
 
-These are documented for future reference but are **not part of the MVP**:
+The app is a Progressive Web App that can be added to the iOS/Android home screen.
+
+### Manifest
+- Served at `/manifest.json` via `Rails::PwaController`
+- `display: standalone` for full-screen app experience
+- App name: "Upkeep", theme color: `#dc2626` (red)
+
+### Service Worker
+- Minimal service worker at `/service-worker` — install + activate only
+- No complex caching (this is a simple status dashboard)
+
+### App Icon Badge
+- Uses `navigator.setAppBadge()` API (iOS 16.4+)
+- Badge count = number of overdue + due_soon tasks
+- Updates on page load, every 5 minutes, and on `visibilitychange`
+- Requires notification permission on iOS (one-time permission banner shown)
+- Badge only updates while the app is open (no server-side push notifications)
+
+---
+
+## 9. Future Enhancements
+
+These are documented for future reference but are **not yet built**:
 
 - **User authentication** — Devise or custom auth, multi-user households with task assignment
 - **Native iOS app** — Separate repository, Swift/SwiftUI, consumes the JSON API
@@ -404,7 +435,7 @@ These are documented for future reference but are **not part of the MVP**:
 
 ---
 
-## 9. Development Setup
+## 10. Development Setup
 
 ### Prerequisites
 

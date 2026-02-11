@@ -2,7 +2,18 @@
 
 All notable changes to Upkeep are documented here.
 
+## 2026-02-10 — Documentation Workflow
+
+Plan: [plans/006-documentation-workflow.md](plans/006-documentation-workflow.md)
+
+- Established convention: plans committed to `plans/` directory, numbered sequentially
+- Changelog entries now reference their corresponding plan
+- SPEC.md updated to reflect current app behavior
+- CLAUDE.md documents the plan/changelog/spec workflow for future sessions
+
 ## 2026-02-10 — PWA Badge Notifications
+
+Plan: [plans/005-pwa-badge-notifications.md](plans/005-pwa-badge-notifications.md)
 
 - Added PWA support: web app manifest, service worker, `navigator.setAppBadge()` integration
 - App icon on iOS home screen now shows a badge count when tasks are overdue or due soon
@@ -10,6 +21,8 @@ All notable changes to Upkeep are documented here.
 - Badge updates on page load, every 5 minutes, and when app returns to foreground
 
 ## 2026-02-10 — Railway Deployment
+
+Plan: [plans/004-railway-deployment.md](plans/004-railway-deployment.md)
 
 - Created private GitHub repo (`sansari/upkeep`)
 - Deployed to Railway with PostgreSQL: https://upkeep-web-production.up.railway.app
@@ -20,6 +33,8 @@ All notable changes to Upkeep are documented here.
 
 ## 2026-02-10 — Dashboard Polish
 
+Plan: [plans/003-dashboard-polish.md](plans/003-dashboard-polish.md)
+
 - Changed dashboard window from 7 days → 30 days → **2 weeks** (14 days)
 - Removed "Not Yet Scheduled" section from dashboard
 - Low stock supplies only appear when their associated task is due within 2 weeks
@@ -28,6 +43,8 @@ All notable changes to Upkeep are documented here.
 - Removed redundant "Dashboard" nav link (🏠 Upkeep logo links to dashboard)
 
 ## 2026-02-10 — Data Entry
+
+Plan: [plans/002-data-entry.md](plans/002-data-entry.md)
 
 - Added areas: Nida's Office, Guest Room
 - Removed areas: Basement, Attic, Garage
@@ -43,6 +60,8 @@ All notable changes to Upkeep are documented here.
 - Logged initial maintenance completions
 
 ## 2026-02-10 — Initial Build
+
+Plan: [plans/001-initial-build.md](plans/001-initial-build.md)
 
 - Rails 8.1.2, Ruby 3.3.7, PostgreSQL 17
 - Data model: Area → Equipment → MaintenanceTask → MaintenanceLog + Supply
