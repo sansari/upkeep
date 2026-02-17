@@ -8,7 +8,6 @@ class MaintenanceTask < ApplicationRecord
   validates :name, presence: true
   validates :frequency_value, presence: true, numericality: { greater_than: 0 }
   validates :frequency_unit, presence: true, inclusion: { in: %w[days weeks months years] }
-  validates :priority, presence: true, inclusion: { in: %w[low medium high urgent] }
 
   scope :overdue, -> { where("next_due_at < ?", Time.current) }
   scope :due_soon, -> { where(next_due_at: Time.current..14.days.from_now) }

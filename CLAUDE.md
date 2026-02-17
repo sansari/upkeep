@@ -36,7 +36,7 @@ Notes for Claude Code sessions working on this project.
 **equipment**: `id`, `area_id` (FK), `name`, `manufacturer`, `model_number`, `description`, `notes`, `purchase_date`
 - Note: column is `manufacturer`, not `brand`
 
-**maintenance_tasks**: `id`, `equipment_id` (FK), `name`, `frequency_value` (int), `frequency_unit` (string, e.g. `"months"`), `priority` (default `"medium"`), `last_completed_at`, `next_due_at`, `instructions`, `notes`
+**maintenance_tasks**: `id`, `equipment_id` (FK), `name`, `frequency_value` (int), `frequency_unit` (string, e.g. `"months"`), `last_completed_at`, `next_due_at`, `instructions`, `notes`
 
 **maintenance_logs**: `id`, `maintenance_task_id` (FK), `completed_at`, `notes`
 

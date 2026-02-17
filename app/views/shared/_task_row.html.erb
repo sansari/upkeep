@@ -4,7 +4,6 @@
       <div class="flex items-center gap-2 flex-wrap">
         <span class="font-medium text-gray-900 text-sm"><%= task.name %></span>
         <%= status_badge(task.due_status) %>
-        <%= priority_badge(task.priority) %>
       </div>
       <div class="text-xs text-gray-500 mt-0.5">
         <% if show_location.present? %>
