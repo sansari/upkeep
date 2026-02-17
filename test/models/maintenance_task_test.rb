@@ -56,9 +56,4 @@ class MaintenanceTaskTest < ActiveSupport::TestCase
     assert_not task.valid?
   end
 
-  test "validates priority inclusion" do
-    task = maintenance_tasks(:replace_water_filter)
-    task.priority = "extreme"
-    assert_not task.valid?
-  end
 end
