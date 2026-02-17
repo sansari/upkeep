@@ -2,6 +2,14 @@
 
 All notable changes to Upkeep are documented here.
 
+## 2026-02-17 — Change PWA Icon to Home Emoji
+
+Plan: [plans/008-change-pwa-icon.md](plans/008-change-pwa-icon.md)
+
+- Updated PWA icon from red circle to home emoji (🏠)
+- Replaced `public/icon.svg` with home emoji design
+- Regenerated `public/icon.png` with home icon graphic
+
 ## 2026-02-10 — Web Push Badge Notifications
 
 Plan: [plans/007-web-push-badge-notifications.md](plans/007-web-push-badge-notifications.md)
