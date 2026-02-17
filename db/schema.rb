@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_02_11_001244) do
+ActiveRecord::Schema[8.1].define(version: 2026_02_16_235646) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -56,11 +56,9 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_11_001244) do
     t.string "name", null: false
     t.datetime "next_due_at"
     t.text "notes"
-    t.string "priority", default: "medium", null: false
     t.datetime "updated_at", null: false
     t.index ["equipment_id"], name: "index_maintenance_tasks_on_equipment_id"
     t.index ["next_due_at"], name: "index_maintenance_tasks_on_next_due_at"
-    t.index ["priority"], name: "index_maintenance_tasks_on_priority"
   end
 
   create_table "push_subscriptions", force: :cascade do |t|

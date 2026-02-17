@@ -27,6 +27,33 @@ Notes for Claude Code sessions working on this project.
 - Use **rake tasks** for common operations: `rake upkeep:status`, `rake upkeep:complete_task[id]`, etc. (see `lib/tasks/upkeep.rake`)
 - For complex data entry, write Ruby scripts to `tmp/` files and run with `bin/rails runner tmp/scriptname.rb` — this avoids shell quoting issues with single quotes in names like "Nida's Office"
 - Never use inline `bin/rails runner '...'` with code containing single quotes
+- **Always use tmp/ scripts for data entry**, never inline runner — even for simple inserts, to avoid quoting bugs
+
+### Database Schema (for data entry)
+
+**areas**: `id`, `name` (unique), `icon`, `position`, `is_default`
+
+**equipment**: `id`, `area_id` (FK), `name`, `manufacturer`, `model_number`, `description`, `notes`, `purchase_date`
+- Note: column is `manufacturer`, not `brand`
+
+**maintenance_tasks**: `id`, `equipment_id` (FK), `name`, `frequency_value` (int), `frequency_unit` (string, e.g. `"months"`), `last_completed_at`, `next_due_at`, `instructions`, `notes`
+
+**maintenance_logs**: `id`, `maintenance_task_id` (FK), `completed_at`, `notes`
+
+**supplies**: `id`, `maintenance_task_id` (FK), `name`, `quantity_on_hand` (default 0), `quantity_per_use` (default 1), `unit_price`, `purchase_url`, `notes`
+
+### Current Areas (production)
+| id | name |
+|----|------|
+| 1  | Kitchen |
+| 2  | Guest Bathroom |
+| 3  | Bedroom |
+| 4  | Living Room |
+| 5  | Outdoor |
+| 9  | Studio |
+| 10 | Whole House |
+| 11 | Nida's Office |
+| 12 | Guest Room |
 
 ### Shell Environment
 - The user's shell is zsh. Always prefix commands with `source ~/.zshrc &&` to ensure rbenv and PostgreSQL are on the PATH
