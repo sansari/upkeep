@@ -1,5 +1,5 @@
 class PushSubscriptionsController < ApplicationController
-  skip_forgery_protection only: [ :create, :destroy ]
+  skip_forgery_protection only: [:create, :destroy]
 
   def create
     subscription = PushSubscription.find_or_initialize_by(endpoint: params[:endpoint])
