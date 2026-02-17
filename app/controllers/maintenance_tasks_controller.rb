@@ -4,7 +4,7 @@ class MaintenanceTasksController < ApplicationController
 
     respond_to do |format|
       format.html
-      format.json { render json: @task.as_json(include: [:equipment, :supplies, :maintenance_logs]) }
+      format.json { render json: @task.as_json(include: [ :equipment, :supplies, :maintenance_logs ]) }
     end
   end
 
@@ -14,7 +14,7 @@ class MaintenanceTasksController < ApplicationController
 
     respond_to do |format|
       format.html { redirect_back fallback_location: maintenance_task_path(@task), notice: "#{@task.name} marked as complete!" }
-      format.json { render json: @task.as_json(include: [:supplies, :maintenance_logs]) }
+      format.json { render json: @task.as_json(include: [ :supplies, :maintenance_logs ]) }
     end
   end
 end
