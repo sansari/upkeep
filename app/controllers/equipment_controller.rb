@@ -4,7 +4,7 @@ class EquipmentController < ApplicationController
 
     respond_to do |format|
       format.html
-      format.json { render json: @equipment.as_json(include: [ :area, { maintenance_tasks: { include: :supplies } } ]) }
+      format.json { render json: @equipment.as_json(include: [:area, { maintenance_tasks: { include: :supplies } }]) }
     end
   end
 end
