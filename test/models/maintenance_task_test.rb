@@ -55,5 +55,4 @@ class MaintenanceTaskTest < ActiveSupport::TestCase
     task.frequency_unit = "centuries"
     assert_not task.valid?
   end
-
 end

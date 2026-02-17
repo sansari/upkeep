@@ -19,4 +19,7 @@
       </div>
     <% end %>
   </div>
+  <div class="shrink-0 ml-3">
+    <%= button_to "Done", complete_maintenance_task_path(task), class: "px-3 py-1.5 bg-green-600 text-white text-xs font-medium rounded-lg hover:bg-green-700 transition-colors", data: { turbo_confirm: "Mark \"#{task.name}\" as done?" } %>
+  </div>
 </div>
