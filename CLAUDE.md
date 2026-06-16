@@ -66,7 +66,7 @@ Notes for Claude Code sessions working on this project.
 - "Not Yet Scheduled" tasks are intentionally hidden from the dashboard
 
 ### Deploy Workflow
-All changes should be **committed, pushed to GitHub, and deployed to Railway** before telling the user "done". The process:
+All changes should be **committed, pushed to GitHub, and deployed to Fly.io** before telling the user "done". The process:
 
 ```bash
 # 1. Commit
@@ -75,37 +75,41 @@ git add <files> && git commit -m "message"
 # 2. Push
 git push origin main
 
-# 3. Deploy (make sure upkeep-web service is linked)
-cd ~/Code/upkeep
-railway service upkeep-web
-railway up --detach
+# 3. Deploy
+cd ~/code/upkeep
+flyctl deploy
 
-# 4. Wait ~2.5 minutes for build, then verify
-railway service status  # should show SUCCESS
-curl -s -o /dev/null -w "%{http_code}" https://upkeep-web-production.up.railway.app/up  # should be 200
+# 4. Wait ~2-3 minutes for build, then verify
+flyctl status  # should show running machines
+curl -s -o /dev/null -w "%{http_code}" https://upkeep-web.fly.dev/up  # should be 200
 ```
+
+**Auto-deploy**: GitHub Actions automatically deploys to Fly.io on every push to main (requires FLY_API_TOKEN secret in GitHub).
 
 ### Production Data & Commands
 **Never lose production data.** Always verify that migrations are additive (CREATE TABLE, ADD COLUMN) before deploying. Never run destructive SQL (DROP, TRUNCATE, DELETE without WHERE) against production. When in doubt, ask first.
 
-Railway has no SSH or remote console. `railway run` doesn't work because it spawns a bare subprocess that skips the shell profile, so rbenv never loads and macOS system Ruby is used instead.
-
-**To run Rails commands against production**, use local Ruby with the production DATABASE_URL:
+**To run Rails commands against production** via Fly SSH:
 ```bash
-source ~/.zshrc && DATABASE_URL="postgresql://postgres:dNVJUrdIWOCWHsVCkgmvehjCtXGiuFTf@ballast.proxy.rlwy.net:49051/railway" bin/rails runner "RUBY CODE"
+flyctl ssh console -C "bin/rails runner 'RUBY CODE'"
 ```
 
 **For rake tasks against production:**
 ```bash
-source ~/.zshrc && DATABASE_URL="postgresql://postgres:dNVJUrdIWOCWHsVCkgmvehjCtXGiuFTf@ballast.proxy.rlwy.net:49051/railway" bin/rails upkeep:status
+flyctl ssh console -C "bin/rails upkeep:status"
 ```
 
-**For raw SQL:**
+**For direct database access** (run migrations, console, etc):
 ```bash
-source ~/.zshrc && psql "postgresql://postgres:dNVJUrdIWOCWHsVCkgmvehjCtXGiuFTf@ballast.proxy.rlwy.net:49051/railway" -c "SQL HERE"
+# SSH into app machine
+flyctl ssh console
+
+# Or proxy to database and connect locally
+flyctl proxy 15432:5432 -a upkeep-web-db &
+psql "postgresql://upkeep_web:REDACTED@localhost:15432/upkeep_web?sslmode=disable"
 ```
 
-For complex Ruby scripts, write to `tmp/` and run with `bin/rails runner tmp/scriptname.rb` (with the DATABASE_URL prefix) to avoid shell quoting issues.
+For complex Ruby scripts, write to `tmp/` and run with `flyctl ssh console -C "bin/rails runner tmp/scriptname.rb"` to avoid shell quoting issues.
 
 ## File Structure (Key Files)
 
@@ -154,15 +158,20 @@ CHANGELOG.md                      # All notable changes with plan references
 CLAUDE.md                         # This file — agent instructions
 ```
 
-## Railway Setup
+## Fly.io Setup
 
-- **Project**: upkeep
-- **Services**: upkeep-web (Rails app) + Postgres
-- **URL**: https://upkeep-web-production.up.railway.app
-- **Environment variables**: RAILS_MASTER_KEY, RAILS_ENV=production, SOLID_QUEUE_IN_PUMA=1, DATABASE_URL (auto-set)
+- **App**: upkeep-web
+- **Database**: upkeep-web-db (unmanaged Postgres 17)
+- **URL**: https://upkeep-web.fly.dev
+- **Region**: sjc (San Jose, CA)
+- **Environment variables**: 
+  - `RAILS_MASTER_KEY` (secret)
+  - `SOLID_QUEUE_IN_PUMA=1` (in fly.toml)
+  - `DATABASE_URL` (auto-set by Fly)
 - **VAPID keys** for Web Push are stored in Rails credentials (encrypted), not env vars
+- **Machines**: 2x shared-cpu-1x with 1GB RAM (always running, auto_stop_machines=off)
 - **Docker entrypoint** loads Solid Queue/Cache schemas into the shared database on first boot
-- **Dockerfile** uses Puma directly (not Thruster) to work with Railway's dynamic PORT
+- **Dockerfile** uses Puma directly (not Thruster) to work with Fly's dynamic PORT
 
 ## Documentation Workflow
 
