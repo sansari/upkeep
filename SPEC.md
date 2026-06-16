@@ -25,7 +25,7 @@ House
 
 ### Users
 
-This is a personal app for 1–2 people (you and your partner). There is no authentication — the app is accessed via its Railway-provided URL.
+This is a personal app for 1–2 people (you and your partner). There is no authentication — the app is accessed via its Fly.io-provided URL.
 
 ---
 
@@ -35,12 +35,12 @@ This is a personal app for 1–2 people (you and your partner). There is no auth
 |-----------------|---------------------------------|----------------------------------------------------|
 | Framework       | Ruby on Rails 8                 | Latest stable release                              |
 | Ruby            | 3.3+                            |                                                    |
-| Database        | PostgreSQL                      | Railway PostgreSQL addon                           |
+| Database        | PostgreSQL 17                   | Fly.io unmanaged Postgres                          |
 | Frontend        | Hotwire (Turbo + Stimulus)      | Server-rendered, SPA-like interactivity            |
 | CSS             | Tailwind CSS                    | Utility-first, mobile-friendly                     |
 | Testing         | Minitest                        | Rails default                                      |
 | Background Jobs | Solid Queue                     | Rails 8 default; used for periodic status checks   |
-| Deployment      | Railway                         | Auto-deploy from GitHub, no cold starts            |
+| Deployment      | Fly.io                          | Auto-deploy from GitHub via GitHub Actions         |
 | API             | JSON (via `respond_to`)         | All controllers serve HTML + JSON from day one     |
 
 ---
@@ -374,28 +374,31 @@ Tasks are categorized by their `next_due_at` relative to now:
 
 ## 7. Deployment
 
-### Platform: Railway
+### Platform: Fly.io
 
-- **Source:** GitHub repository (`sansari/upkeep`), deploy via `railway up`
-- **Database:** Railway PostgreSQL addon (single database shared by primary, Solid Cache, Solid Queue)
-- **URL:** https://upkeep-web-production.up.railway.app
+- **Source:** GitHub repository (`sansari/upkeep`), deploy via `flyctl deploy` or GitHub Actions
+- **App:** upkeep-web (2x shared-cpu-1x machines, 1GB RAM, always-on)
+- **Database:** upkeep-web-db (unmanaged PostgreSQL 17, single database shared by primary, Solid Cache, Solid Queue)
+- **Region:** sjc (San Jose, CA)
+- **URL:** https://upkeep-web.fly.dev
 - **No custom domain needed**
 - **No authentication needed**
 
 ### Environment Variables
 
-| Variable              | Purpose                                      |
-|-----------------------|----------------------------------------------|
-| `DATABASE_URL`        | PostgreSQL connection (auto-set by Railway)   |
-| `RAILS_ENV`           | `production`                                  |
-| `RAILS_MASTER_KEY`    | Decrypts `config/credentials.yml.enc`        |
-| `SOLID_QUEUE_IN_PUMA` | `1` — runs Solid Queue inside Puma process   |
+| Variable              | Purpose                                       | Set via             |
+|-----------------------|-----------------------------------------------|---------------------|
+| `DATABASE_URL`        | PostgreSQL connection                         | Auto-set by Fly     |
+| `RAILS_MASTER_KEY`    | Decrypts `config/credentials.yml.enc`        | `flyctl secrets`    |
+| `SOLID_QUEUE_IN_PUMA` | `1` — runs Solid Queue inside Puma process   | `fly.toml`          |
 
 ### Deployment Files
 
+- `fly.toml` — Fly.io configuration (machines, regions, env vars, HTTP service)
 - `Dockerfile` — multi-stage build, Ruby 3.3.7-slim, Puma on dynamic PORT
 - `bin/docker-entrypoint` — runs `db:prepare` + loads Solid Queue/Cache schemas
 - `config/database.yml` — production uses `DATABASE_URL` for all three database roles
+- `.github/workflows/fly-deploy.yml` — Auto-deploy on push to main (requires `FLY_API_TOKEN` secret)
 
 ---
 
@@ -409,7 +412,7 @@ The app is a Progressive Web App that can be added to the iOS/Android home scree
 - App name: "Upkeep", theme color: `#dc2626` (red)
 
 ### Service Worker
-- Minimal service worker at `/service-worker` — install + activate only
+- Minimal service worker at `/service-worker.js` — install + activate + push handlers
 - No complex caching (this is a simple status dashboard)
 
 ### App Icon Badge

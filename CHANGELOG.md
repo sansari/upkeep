@@ -2,6 +2,19 @@
 
 All notable changes to Upkeep are documented here.
 
+## 2026-06-15 — Migrate from Railway to Fly.io
+
+Plan: [plans/012-migrate-to-flyio.md](plans/012-migrate-to-flyio.md)
+
+- **Migrated hosting from Railway to Fly.io** (free tier)
+- App now runs at `https://upkeep-web.fly.dev`
+- 2x always-on machines (shared-cpu-1x, 1GB RAM) in sjc region  
+- Unmanaged PostgreSQL 17 database
+- Auto-deploy via GitHub Actions on push to main
+- **Regenerated VAPID keys** for Web Push notifications (users will need to re-grant permission)
+- Updated deployment documentation in CLAUDE.md and SPEC.md with Fly.io commands
+- All production data successfully migrated from Railway
+
 ## 2026-02-17 — Change PWA Icon to Home Emoji
 
 Plan: [plans/008-change-pwa-icon.md](plans/008-change-pwa-icon.md)
