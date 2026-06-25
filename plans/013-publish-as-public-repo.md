@@ -57,7 +57,7 @@ The README still says the app is deployed to Railway. It should reflect the curr
 flyctl ssh console -a <your-db-app>
 # Inside the console:
 psql -U postgres
-ALTER USER upkeep_web WITH PASSWORD 'new-strong-password-here';
+ALTER USER <your_db_user> WITH PASSWORD 'new-strong-password-here';
 \q
 
 # Update the DATABASE_URL secret on the app
@@ -74,7 +74,7 @@ Add a note that the password is available via `flyctl ssh console --command 'pri
 **Option B (Acceptable if password is rotated):** Leave history as-is. The credential is no longer valid after rotation. Add a note in the commit or README that history was not rewritten. This is simpler but leaves stale credentials visible in old commits.
 
 ### Step 4 — Update `README.md`
-- Change "deployed to Railway" → deployed to Fly.io at `https://upkeep-web.fly.dev`
+- Change "deployed to Railway" → deployed to Fly.io at your app URL
 - Update CI/CD section: remove `RAILWAY_TOKEN` references, add `FLY_API_TOKEN`
 - Optionally add a brief "self-hosting" section
 

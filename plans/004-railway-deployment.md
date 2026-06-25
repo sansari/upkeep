@@ -8,7 +8,7 @@ The app is fully built and working locally with all data entered. Deploy to Rail
 
 ### 1. GitHub
 - Created private repo: `gh repo create upkeep --private --source=. --push`
-- Repo: https://github.com/sansari/upkeep
+- Repo: created on GitHub
 
 ### 2. Production Config Changes
 - **`config/database.yml`**: Replaced production section to use `DATABASE_URL` for all three database roles (primary, cache, queue) — Railway provides a single PostgreSQL instance
@@ -20,7 +20,7 @@ The app is fully built and working locally with all data entered. Deploy to Rail
 - Installed Railway CLI: `brew install railway`
 - Created project: `railway init --name upkeep`
 - Added PostgreSQL: `railway add --database postgres`
-- Created web service: `railway add --service upkeep-web`
+- Created web service: `railway add --service <app-name>`
 - Set DATABASE_URL reference: `railway variable set 'DATABASE_URL=${{Postgres.DATABASE_URL}}'`
 - Set env vars: RAILS_MASTER_KEY, RAILS_ENV=production, SOLID_QUEUE_IN_PUMA=1
 
