@@ -34,7 +34,7 @@ The password `REDACTED` is embedded in a committed file. This means:
 The README still says the app is deployed to Railway. It should reflect the current Fly.io deployment.
 
 #### 3. `CLAUDE.md` Contains Personal Context Not Useful Publicly
-`CLAUDE.md` is written as internal agent notes (mentions "user + partner", personal area names like "Nida's Office", etc.). Decide: keep it as-is (shows real-world usage context) or strip personal references.
+`CLAUDE.md` is written as internal agent notes (mentions "user + partner", personal area names, etc.). Decide: keep it as-is (shows real-world usage context) or strip personal references.
 
 ---
 

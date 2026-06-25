@@ -79,17 +79,17 @@ Plan: [plans/003-dashboard-polish.md](plans/003-dashboard-polish.md)
 
 Plan: [plans/002-data-entry.md](plans/002-data-entry.md)
 
-- Added areas: Nida's Office, Guest Room
+- Added areas: Office, Guest Room
 - Removed areas: Basement, Attic, Garage
 - Renamed: Bathroom → Guest Bathroom
 - Added equipment: Drinking Water Filter, Shower Head Filter, 5 Mini-Split ACs, 2 Compressors
 - Configured maintenance schedules:
   - Living Room & Bedroom mini-splits: every 6 weeks
-  - Studio, Nida's Office, Guest Room mini-splits: every 3 months
+  - Studio, Office, Guest Room mini-splits: every 3 months
   - Compressors: every 6 months
   - Water filter: yearly
   - Shower head filters: every 6 months
-- Added supplies with Amazon/Multipure purchase links
+- Added supplies with purchase links
 - Logged initial maintenance completions
 
 ## 2026-02-10 — Initial Build

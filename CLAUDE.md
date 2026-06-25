@@ -25,7 +25,7 @@ Notes for Claude Code sessions working on this project.
 
 ### Data Management
 - Use **rake tasks** for common operations: `rake upkeep:status`, `rake upkeep:complete_task[id]`, etc. (see `lib/tasks/upkeep.rake`)
-- For complex data entry, write Ruby scripts to `tmp/` files and run with `bin/rails runner tmp/scriptname.rb` — this avoids shell quoting issues with single quotes in names like "Nida's Office"
+- For complex data entry, write Ruby scripts to `tmp/` files and run with `bin/rails runner tmp/scriptname.rb` — this avoids shell quoting issues with single quotes in names like "Partner's Office"
 - Never use inline `bin/rails runner '...'` with code containing single quotes
 - **Always use tmp/ scripts for data entry**, never inline runner — even for simple inserts, to avoid quoting bugs
 
@@ -52,7 +52,7 @@ Notes for Claude Code sessions working on this project.
 | 5  | Outdoor |
 | 9  | Studio |
 | 10 | Whole House |
-| 11 | Nida's Office |
+| 11 | Office |
 | 12 | Guest Room |
 
 ### Shell Environment
