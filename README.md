@@ -33,7 +33,7 @@ Personal home maintenance management app. Tracks areas of the house, equipment, 
 
 ## Deployment
 
-The app is deployed to Railway at https://upkeep-web-production.up.railway.app
+The app is deployed to [Fly.io](https://fly.io) at https://upkeep-web.fly.dev
 
 ### CI/CD
 
@@ -41,16 +41,18 @@ GitHub Actions automatically:
 - Runs security scans (Brakeman, Bundler Audit)
 - Lints code with RuboCop
 - Runs the test suite
-- Deploys to Railway on pushes to `main` (requires `RAILWAY_TOKEN` secret)
-- Verifies deployment health and displays the live URL
+- Deploys to Fly.io on pushes to `main` (requires `FLY_API_TOKEN` secret)
+- Verifies deployment health
 
-### Railway Token Setup
+### Fly.io Setup
 
-For the deploy job to work, add a `RAILWAY_TOKEN` secret to your GitHub repository:
+For the deploy job to work, add a `FLY_API_TOKEN` secret to your GitHub repository:
 
-1. Get a Railway API token from your Railway project settings
-2. Add it to GitHub repository secrets as `RAILWAY_TOKEN`
+1. Get a Fly.io API token: `flyctl auth token`
+2. Add it to GitHub repository secrets as `FLY_API_TOKEN`
 3. The CI workflow will use this to deploy on main branch pushes
+
+See `fly.toml` for machine configuration and `plans/012-migrate-to-flyio.md` for full setup notes.
 
 ## Documentation
 

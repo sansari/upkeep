@@ -106,7 +106,8 @@ flyctl ssh console
 
 # Or proxy to database and connect locally
 flyctl proxy 15432:5432 -a upkeep-web-db &
-psql "postgresql://upkeep_web:REDACTED@localhost:15432/upkeep_web?sslmode=disable"
+psql "postgresql://upkeep_web:<DB_PASSWORD>@localhost:15432/upkeep_web?sslmode=disable"
+# Note: DB_PASSWORD is available via: flyctl ssh console -a upkeep-web --command 'printenv DATABASE_URL'
 ```
 
 For complex Ruby scripts, write to `tmp/` and run with `flyctl ssh console -C "bin/rails runner tmp/scriptname.rb"` to avoid shell quoting issues.
