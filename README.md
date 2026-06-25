@@ -2,11 +2,8 @@
 
 Personal home maintenance management app. Tracks areas of the house, equipment, recurring maintenance tasks, completion logs, and supplies.
 
-<img width="480" height="1040" alt="IMG_6348" src="https://github.com/user-attachments/assets/5c5e9044-2e7b-4e86-82fa-5b687d060313" />
-<img width="480" height="1040" alt="IMG_6347" src="https://github.com/user-attachments/assets/8d56b0b8-f3ae-413a-9c3d-a1b7933b3355" />
-
-
-**All data management happens through Claude Code conversations** — the web app is a read-only status dashboard. No admin UI, no forms.
+<img width="240" height="520" alt="IMG_6348" src="https://github.com/user-attachments/assets/5c5e9044-2e7b-4e86-82fa-5b687d060313" />
+<img width="240" height="520" alt="IMG_6347" src="https://github.com/user-attachments/assets/8d56b0b8-f3ae-413a-9c3d-a1b7933b3355" />
 
 ## Tech Stack
 
@@ -36,6 +33,8 @@ Personal home maintenance management app. Tracks areas of the house, equipment, 
    ```bash
    bin/dev
    ```
+
+**All data management happens through Claude Code conversations** — the web app is a read-only status dashboard. No admin UI, no forms.
 
 ## Self-Hosting on Fly.io
 
