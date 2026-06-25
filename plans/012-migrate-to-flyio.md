@@ -33,10 +33,10 @@ Railway trial credits ran out, causing the app to go down. Need to migrate to a 
 
 ### 3. Initialize Fly.io app
 ```bash
-flyctl launch --no-deploy --name upkeep-web
+flyctl launch --no-deploy
 ```
 - Creates `fly.toml` configuration
-- Provisions PostgreSQL database: upkeep-web-db
+- Provision a Postgres database: `flyctl postgres create` + `flyctl postgres attach`
 - Sets up DATABASE_URL secret
 
 ### 4. Configure Fly.io
@@ -70,10 +70,10 @@ pg_dump "postgresql://postgres:...@ballast.proxy.rlwy.net:49051/railway" \
 ### 7. Import data to Fly.io
 ```bash
 # Proxy to Fly.io database
-flyctl proxy 15432:5432 -a upkeep-web-db &
+flyctl proxy 15432:5432 -a <your-db-app> &
 
 # Delete seed data
-psql "postgresql://upkeep_web:...@localhost:15432/upkeep_web?sslmode=disable" <<SQL
+psql "<DATABASE_URL with localhost:15432>" <<SQL
 DELETE FROM supplies;
 DELETE FROM maintenance_logs;
 DELETE FROM maintenance_tasks;
@@ -82,11 +82,11 @@ DELETE FROM areas;
 SQL
 
 # Import data
-psql "postgresql://upkeep_web:...@localhost:15432/upkeep_web?sslmode=disable" < /tmp/upkeep_data.sql
+psql "<DATABASE_URL with localhost:15432>" < /tmp/upkeep_data.sql
 ```
 
 ### 8. Verify deployment
-- Check app is accessible: `https://upkeep-web.fly.dev`
+- Check app is accessible at your Fly.io app URL
 - Verify data is present (overdue tasks show up)
 - Confirm machines are running: `flyctl status`
 
@@ -117,10 +117,10 @@ psql "postgresql://upkeep_web:...@localhost:15432/upkeep_web?sslmode=disable" < 
 flyctl status
 
 # Verify deployment
-curl -I https://upkeep-web.fly.dev
+curl -I https://<your-app>.fly.dev
 
 # Check dashboard
-curl -s https://upkeep-web.fly.dev/ | grep -o "Overdue\|Due Soon\|Nothing to do"
+curl -s https://<your-app>.fly.dev/ | grep -o "Overdue\|Due Soon\|Nothing to do"
 
 # Verify machines are always-on
 flyctl scale show  # min_machines_running = 1, auto_stop = off
@@ -138,7 +138,6 @@ flyctl scale show  # min_machines_running = 1, auto_stop = off
 
 June 15, 2026
 
-## Production URL
+## Result
 
-- **Old**: https://upkeep-web-production.up.railway.app (down)
-- **New**: https://upkeep-web.fly.dev (live)
+Migrated from Railway to Fly.io. Railway deployment decommissioned.

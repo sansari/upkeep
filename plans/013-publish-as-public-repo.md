@@ -2,7 +2,7 @@
 
 ## Motivation
 
-The repo is currently private (`sansari/upkeep`). Publishing it publicly requires a security review to ensure no real credentials, personal data, or internal infrastructure details are exposed in the git history or current files.
+The repo is currently private. Publishing it publicly requires a security review to ensure no real credentials, personal data, or internal infrastructure details are exposed in the git history or current files.
 
 ---
 
@@ -14,7 +14,7 @@ The repo is currently private (`sansari/upkeep`). Publishing it publicly require
 Line 109 of `CLAUDE.md` contains a real Fly.io PostgreSQL credential:
 
 ```
-psql "postgresql://upkeep_web:REDACTED@localhost:15432/upkeep_web?sslmode=disable"
+psql "<DATABASE_URL with localhost:15432>"
 ```
 
 The password `REDACTED` is embedded in a committed file. This means:
@@ -54,22 +54,19 @@ The README still says the app is deployed to Railway. It should reflect the curr
 ### Step 1 — Rotate the DB Password (Before Anything Else)
 ```bash
 # Connect to Fly.io and change the postgres user password
-flyctl ssh console -a upkeep-web-db
+flyctl ssh console -a <your-db-app>
 # Inside the console:
 psql -U postgres
 ALTER USER upkeep_web WITH PASSWORD 'new-strong-password-here';
 \q
 
 # Update the DATABASE_URL secret on the app
-flyctl secrets set DATABASE_URL="postgresql://upkeep_web:new-strong-password@..."  -a upkeep-web
+flyctl secrets set DATABASE_URL="<new-connection-string>" -a <your-app>
 ```
 
 ### Step 2 — Redact the Password in `CLAUDE.md`
-Replace the literal password in the `psql` connection string with a placeholder:
-```
-psql "postgresql://upkeep_web:<DB_PASSWORD>@localhost:15432/upkeep_web?sslmode=disable"
-```
-Add a note that the password is available via `flyctl secrets list` or Fly.io dashboard.
+Replace the literal password in the `psql` connection string with a placeholder.
+Add a note that the password is available via `flyctl ssh console --command 'printenv DATABASE_URL'`.
 
 ### Step 3 — Decide on Git History
 **Option A (Recommended for cleanliness):** Use `git filter-repo` to rewrite history and remove the credential from all past commits. This requires a force push and will break any existing forks/PRs.
@@ -91,12 +88,12 @@ Decide whether to:
 ```bash
 # Via GitHub UI: Settings → Danger Zone → Change repository visibility → Public
 # Or via gh CLI:
-gh repo edit sansari/upkeep --visibility public
+gh repo edit <your-username>/upkeep --visibility public
 ```
 
 ### Step 7 — Verify After Going Public
 - Confirm no secrets in current files: `git grep -i "password\|secret\|token\|key" -- ":(exclude)*.enc"`
-- Check that the deployed app still works: `curl -s -o /dev/null -w "%{http_code}" https://upkeep-web.fly.dev/up`
+- Check that the deployed app still works: `curl -s -o /dev/null -w "%{http_code}" https://<your-app>.fly.dev/up`
 
 ---
 

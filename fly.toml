@@ -1,10 +1,12 @@
-# fly.toml app configuration file generated for upkeep-web on 2026-06-15T21:51:31-07:00
+# fly.toml — Fly.io app configuration
+# See https://fly.io/docs/reference/configuration/ for details.
 #
-# See https://fly.io/docs/reference/configuration/ for information about how to use this file.
-#
+# Before deploying, set your app name:
+#   flyctl launch --no-deploy
+# Or edit `app` and `primary_region` below directly.
 
-app = 'upkeep-web'
-primary_region = 'sjc'
+app = 'your-app-name'
+primary_region = 'ord'
 console_command = '/rails/bin/rails console'
 
 [build]

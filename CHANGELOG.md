@@ -7,10 +7,9 @@ All notable changes to Upkeep are documented here.
 Plan: [plans/012-migrate-to-flyio.md](plans/012-migrate-to-flyio.md)
 
 - **Migrated hosting from Railway to Fly.io** (free tier)
-- App now runs at `https://upkeep-web.fly.dev`
-- 2x always-on machines (shared-cpu-1x, 1GB RAM) in sjc region  
+- 2x always-on machines (shared-cpu-1x, 1GB RAM)
 - Unmanaged PostgreSQL 17 database
-- Auto-deploy via GitHub Actions on push to main
+- Auto-deploy via GitHub Actions on push to main (requires `FLY_API_TOKEN` secret)
 - **Regenerated VAPID keys** for Web Push notifications (users will need to re-grant permission)
 - Updated deployment documentation in CLAUDE.md and SPEC.md with Fly.io commands
 - All production data successfully migrated from Railway
@@ -57,12 +56,11 @@ Plan: [plans/005-pwa-badge-notifications.md](plans/005-pwa-badge-notifications.m
 
 Plan: [plans/004-railway-deployment.md](plans/004-railway-deployment.md)
 
-- Created private GitHub repo (`sansari/upkeep`)
-- Deployed to Railway with PostgreSQL: https://upkeep-web-production.up.railway.app
+- Created GitHub repo and deployed to Railway with PostgreSQL
 - Configured single-database setup for primary + Solid Cache + Solid Queue
 - Docker entrypoint loads Solid Queue/Cache schemas on first boot
 - Switched from Thruster to Puma for Railway's dynamic PORT assignment
-- Migrated all development data (9 areas, 9 equipment, 9 tasks, 3 supplies, 9 logs) to production via pg_dump/pg_restore
+- Migrated all development data to production via pg_dump/pg_restore
 
 ## 2026-02-10 — Dashboard Polish
 

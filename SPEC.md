@@ -376,11 +376,9 @@ Tasks are categorized by their `next_due_at` relative to now:
 
 ### Platform: Fly.io
 
-- **Source:** GitHub repository (`sansari/upkeep`), deploy via `flyctl deploy` or GitHub Actions
-- **App:** upkeep-web (2x shared-cpu-1x machines, 1GB RAM, always-on)
-- **Database:** upkeep-web-db (unmanaged PostgreSQL 17, single database shared by primary, Solid Cache, Solid Queue)
-- **Region:** sjc (San Jose, CA)
-- **URL:** https://upkeep-web.fly.dev
+- **Deploy:** `flyctl deploy` or GitHub Actions (push to `main` with `FLY_API_TOKEN` secret)
+- **Machines:** 2x shared-cpu-1x, 1GB RAM, always-on (`auto_stop_machines = 'off'`)
+- **Database:** Unmanaged PostgreSQL 17, single database shared by primary, Solid Cache, Solid Queue
 - **No custom domain needed**
 - **No authentication needed**
 

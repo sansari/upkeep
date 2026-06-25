@@ -9,7 +9,7 @@ Notes for Claude Code sessions working on this project.
 - **Architecture**: Areas → Equipment → MaintenanceTasks → MaintenanceLogs + Supplies
 - **Web app is read-only** — a status dashboard only, no forms or admin UI
 - **All data management happens through Claude Code conversations** using rake tasks, Rails runner scripts, and Rails console
-- **No authentication** — personal use only (user + partner)
+- **No authentication** — personal use, accessed directly via URL
 
 ## Tech Stack
 
@@ -25,7 +25,7 @@ Notes for Claude Code sessions working on this project.
 
 ### Data Management
 - Use **rake tasks** for common operations: `rake upkeep:status`, `rake upkeep:complete_task[id]`, etc. (see `lib/tasks/upkeep.rake`)
-- For complex data entry, write Ruby scripts to `tmp/` files and run with `bin/rails runner tmp/scriptname.rb` — this avoids shell quoting issues with single quotes in names like "Partner's Office"
+- For complex data entry, write Ruby scripts to `tmp/` files and run with `bin/rails runner tmp/scriptname.rb` — this avoids shell quoting issues with single quotes in names (e.g. `"Partner's Office"`)
 - Never use inline `bin/rails runner '...'` with code containing single quotes
 - **Always use tmp/ scripts for data entry**, never inline runner — even for simple inserts, to avoid quoting bugs
 
@@ -42,22 +42,16 @@ Notes for Claude Code sessions working on this project.
 
 **supplies**: `id`, `maintenance_task_id` (FK), `name`, `quantity_on_hand` (default 0), `quantity_per_use` (default 1), `unit_price`, `purchase_url`, `notes`
 
-### Current Areas (production)
-| id | name |
-|----|------|
-| 1  | Kitchen |
-| 2  | Guest Bathroom |
-| 3  | Bedroom |
-| 4  | Living Room |
-| 5  | Outdoor |
-| 9  | Studio |
-| 10 | Whole House |
-| 11 | Office |
-| 12 | Guest Room |
+### Checking Current Data
+To see areas, equipment, and task status, use the rake task:
+```bash
+rake upkeep:status
+```
+Or query directly: `bin/rails runner 'Area.all.each { |a| puts "#{a.id}: #{a.name}" }'`
 
 ### Shell Environment
-- The user's shell is zsh. Always prefix commands with `source ~/.zshrc &&` to ensure rbenv and PostgreSQL are on the PATH
-- Without this, commands fall back to macOS system Ruby 2.6 which is incompatible
+- Always ensure your Ruby version manager (rbenv, rvm, etc.) is active before running commands
+- On macOS with rbenv via Homebrew, prefix commands with `source ~/.zshrc &&` if the correct Ruby isn't on PATH
 
 ### Dashboard Behavior
 - Shows tasks due within **2 weeks** (14 days) or overdue
@@ -76,12 +70,11 @@ git add <files> && git commit -m "message"
 git push origin main
 
 # 3. Deploy
-cd ~/code/upkeep
 flyctl deploy
 
 # 4. Wait ~2-3 minutes for build, then verify
 flyctl status  # should show running machines
-curl -s -o /dev/null -w "%{http_code}" https://upkeep-web.fly.dev/up  # should be 200
+curl -s -o /dev/null -w "%{http_code}" https://<your-app>.fly.dev/up  # should be 200
 ```
 
 **Auto-deploy**: GitHub Actions automatically deploys to Fly.io on every push to main (requires FLY_API_TOKEN secret in GitHub).
@@ -105,9 +98,10 @@ flyctl ssh console -C "bin/rails upkeep:status"
 flyctl ssh console
 
 # Or proxy to database and connect locally
-flyctl proxy 15432:5432 -a upkeep-web-db &
-psql "postgresql://upkeep_web:<DB_PASSWORD>@localhost:15432/upkeep_web?sslmode=disable"
-# Note: DB_PASSWORD is available via: flyctl ssh console -a upkeep-web --command 'printenv DATABASE_URL'
+# Find your DB app name in fly.toml or: flyctl postgres list
+flyctl proxy 15432:5432 -a <your-db-app> &
+# Connection string available via: flyctl ssh console --command 'printenv DATABASE_URL'
+psql "<DATABASE_URL with localhost:15432>"
 ```
 
 For complex Ruby scripts, write to `tmp/` and run with `flyctl ssh console -C "bin/rails runner tmp/scriptname.rb"` to avoid shell quoting issues.
@@ -161,16 +155,14 @@ CLAUDE.md                         # This file — agent instructions
 
 ## Fly.io Setup
 
-- **App**: upkeep-web
-- **Database**: upkeep-web-db (unmanaged Postgres 17)
-- **URL**: https://upkeep-web.fly.dev
-- **Region**: sjc (San Jose, CA)
-- **Environment variables**: 
-  - `RAILS_MASTER_KEY` (secret)
-  - `SOLID_QUEUE_IN_PUMA=1` (in fly.toml)
-  - `DATABASE_URL` (auto-set by Fly)
-- **VAPID keys** for Web Push are stored in Rails credentials (encrypted), not env vars
-- **Machines**: 2x shared-cpu-1x with 1GB RAM (always running, auto_stop_machines=off)
+See `fly.toml` for machine configuration. Key points:
+
+- **App name / URL**: Set in `fly.toml`. Run `flyctl launch` to provision a new app.
+- **Database**: Attach an unmanaged Postgres app via `flyctl postgres create` + `flyctl postgres attach`
+- **Required secrets**: `flyctl secrets set RAILS_MASTER_KEY=$(cat config/master.key)`
+- **`DATABASE_URL`** is auto-set by Fly when you attach a Postgres database
+- **VAPID keys** for Web Push are stored in Rails credentials (encrypted), not env vars — generate with `bin/rails credentials:edit`
+- **`SOLID_QUEUE_IN_PUMA=1`** is set in `fly.toml` env section
 - **Docker entrypoint** loads Solid Queue/Cache schemas into the shared database on first boot
 - **Dockerfile** uses Puma directly (not Thruster) to work with Fly's dynamic PORT
 
