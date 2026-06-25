@@ -26,7 +26,7 @@ The app is fully built and working locally with all data entered. Deploy to Rail
 
 ### 4. Data Migration
 - Dumped local database: `pg_dump -Fc --no-owner --no-privileges upkeep_development > /tmp/upkeep_dev.dump`
-- Used public DATABASE_URL to connect: `postgresql://postgres:...@ballast.proxy.rlwy.net:49051/railway`
+- Used public DATABASE_URL to connect: `postgresql://postgres:<REDACTED>@ballast.proxy.rlwy.net:49051/railway`
 - Cleared seeded data via psql
 - Restored with: `pg_restore --data-only --disable-triggers --no-owner --no-privileges -t areas -t equipment -t maintenance_tasks -t maintenance_logs -t supplies`
 - Reset sequences via psql
@@ -39,7 +39,7 @@ The app is fully built and working locally with all data entered. Deploy to Rail
 ## Production Details
 - **URL**: https://upkeep-web-production.up.railway.app
 - **Database**: Single PostgreSQL shared by primary, Solid Cache, Solid Queue
-- **Public DB URL**: `postgresql://postgres:REDACTED@ballast.proxy.rlwy.net:49051/railway`
+- **Public DB URL**: `postgresql://postgres:<REDACTED>@ballast.proxy.rlwy.net:49051/railway`
 
 ## Files Modified
 - `config/database.yml`
