@@ -6,9 +6,18 @@ All notable changes to Upkeep are documented here.
 
 ### Added
 
+- Added accessible, ordered reference diagrams to maintenance tasks, including AquaHomeGroup cartridge-orientation guides and shower-head opening, descaling, and reassembly instructions.
+
+  Plan: [plans/015-maintenance-guide-images.md](plans/015-maintenance-guide-images.md)
 - Added shared-password authentication for all household data and JSON endpoints, with one-year encrypted sessions, sign-out, rate-limited login attempts, and unauthenticated API protection. The health check and non-sensitive PWA assets remain public.
 
   Plan: [plans/014-single-user-authentication.md](plans/014-single-user-authentication.md)
+
+### Changed
+
+- Consolidated five mini-split filter-washing schedules into one task covering all units every three months while retaining completion history.
+
+  Plan: [plans/016-group-mini-split-maintenance.md](plans/016-group-mini-split-maintenance.md)
 
 ## 2026-06-15 — Migrate from Railway to Fly.io
 

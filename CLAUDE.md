@@ -40,6 +40,8 @@ Notes for Claude Code sessions working on this project.
 
 **maintenance_logs**: `id`, `maintenance_task_id` (FK), `completed_at`, `notes`
 
+**maintenance_task_images**: `id`, `maintenance_task_id` (FK), `image_path` (local `/guides/*.svg`), `alt_text`, `caption`, `position`
+
 **supplies**: `id`, `maintenance_task_id` (FK), `name`, `quantity_on_hand` (default 0), `quantity_per_use` (default 1), `unit_price`, `purchase_url`, `notes`
 
 ### Checking Current Data
@@ -131,6 +133,7 @@ app/
     equipment.rb               # belongs_to :area, has_many :maintenance_tasks
     maintenance_task.rb        # Core model — scopes, complete!, due_status
     maintenance_log.rb         # Completion records
+    maintenance_task_image.rb  # Ordered visual task guidance
     supply.rb                  # Inventory tracking with low_stock?
     push_subscription.rb       # Web Push subscription (endpoint, keys)
   views/
@@ -152,6 +155,8 @@ config/
   routes.rb                       # Includes PWA routes
   recurring.yml                   # Solid Queue recurring jobs
   database.yml                    # Production uses DATABASE_URL for all databases
+public/
+  guides/                         # Local SVG maintenance diagrams
 db/
   seeds.rb                        # Default areas (10, but 3 were removed from DB)
 plans/

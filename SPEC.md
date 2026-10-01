@@ -14,7 +14,8 @@ House
     └── Equipment (Mini-Split AC, Water Filter, Shower Head, ...)
         └── Maintenance Task (Wash filters every 2 months, Replace filter yearly, ...)
             ├── Maintenance Log (history of completions)
-            └── Supply (filters, parts — with purchase links and inventory)
+            ├── Supply (filters, parts — with purchase links and inventory)
+            └── Instruction Image (ordered visual maintenance guidance)
 ```
 
 ### Management Model
@@ -109,6 +110,7 @@ A recurring (or one-time) maintenance action for a piece of equipment.
 - `belongs_to :equipment`
 - `has_many :maintenance_logs` (dependent: destroy)
 - `has_many :supplies` (dependent: destroy)
+- `has_many :instruction_images` (ordered by position, dependent: destroy)
 
 **Validations:**
 - `frequency_unit` must be one of: `days`, `weeks`, `months`, `years`
@@ -124,7 +126,19 @@ A recurring (or one-time) maintenance action for a piece of equipment.
 - `due_status` — Returns `:overdue`, `:due_soon`, `:upcoming`, or `:not_scheduled`
 - `frequency_description` — Returns human-readable string like "Every 2 months"
 
-### 3.4 MaintenanceLog
+### 3.4 MaintenanceTaskImage
+
+An ordered reference diagram displayed with a maintenance task's instructions.
+
+| Column                | Type     | Notes                                                   |
+|-----------------------|----------|---------------------------------------------------------|
+| `maintenance_task_id` | bigint   | Foreign key → MaintenanceTask. Required.                |
+| `image_path`          | string   | Required local SVG path under `/guides/`.               |
+| `alt_text`            | string   | Required accessible description.                       |
+| `caption`             | string   | Optional visible explanation.                           |
+| `position`            | integer  | Display order. Default: 0.                              |
+
+### 3.5 MaintenanceLog
 
 A record of a completed maintenance action. This is the history.
 
@@ -139,7 +153,7 @@ A record of a completed maintenance action. This is the history.
 
 **Associations:** `belongs_to :maintenance_task`
 
-### 3.5 Supply
+### 3.6 Supply
 
 Something consumed during maintenance — filters, parts, cleaning products, etc. Tracks inventory and provides purchase links for easy reordering.
 
@@ -230,6 +244,7 @@ Full view of a maintenance task:
 - Task name, priority, status, frequency
 - Next due date, last completed date
 - **Instructions** — full how-to text (can be multiple paragraphs)
+- **Reference images** — ordered, captioned maintenance diagrams when configured
 - **Supplies needed** — with quantities, stock status, purchase links
 - **History** — chronological list of MaintenanceLog entries (date + notes)
 

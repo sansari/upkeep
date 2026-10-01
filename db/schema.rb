@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_02_16_235646) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_01_000000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -44,6 +44,18 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_16_235646) do
     t.text "notes"
     t.datetime "updated_at", null: false
     t.index ["maintenance_task_id"], name: "index_maintenance_logs_on_maintenance_task_id"
+  end
+
+  create_table "maintenance_task_images", force: :cascade do |t|
+    t.string "alt_text", null: false
+    t.string "caption"
+    t.datetime "created_at", null: false
+    t.string "image_path", null: false
+    t.bigint "maintenance_task_id", null: false
+    t.integer "position", default: 0, null: false
+    t.datetime "updated_at", null: false
+    t.index ["maintenance_task_id", "position"], name: "idx_on_maintenance_task_id_position_55b69d7699"
+    t.index ["maintenance_task_id"], name: "index_maintenance_task_images_on_maintenance_task_id"
   end
 
   create_table "maintenance_tasks", force: :cascade do |t|
@@ -85,6 +97,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_16_235646) do
 
   add_foreign_key "equipment", "areas"
   add_foreign_key "maintenance_logs", "maintenance_tasks"
+  add_foreign_key "maintenance_task_images", "maintenance_tasks"
   add_foreign_key "maintenance_tasks", "equipment"
   add_foreign_key "supplies", "maintenance_tasks"
 end

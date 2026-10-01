@@ -48,6 +48,22 @@
     </section>
   <% end %>
 
+  <% if @task.instruction_images.any? %>
+    <section>
+      <h2 class="text-lg font-semibold text-gray-900 mb-2">Reference Images</h2>
+      <div class="grid gap-4 sm:grid-cols-2">
+        <% @task.instruction_images.each do |instruction_image| %>
+          <figure class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+            <%= image_tag instruction_image.image_path, alt: instruction_image.alt_text, class: "block w-full h-auto" %>
+            <% if instruction_image.caption.present? %>
+              <figcaption class="p-3 text-sm text-gray-600 border-t border-gray-100"><%= instruction_image.caption %></figcaption>
+            <% end %>
+          </figure>
+        <% end %>
+      </div>
+    </section>
+  <% end %>
+
   <% if @task.notes.present? %>
     <section>
       <h2 class="text-lg font-semibold text-gray-900 mb-2">Notes</h2>

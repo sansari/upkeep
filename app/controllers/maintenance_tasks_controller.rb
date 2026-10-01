@@ -1,10 +1,10 @@
 class MaintenanceTasksController < ApplicationController
   def show
-    @task = MaintenanceTask.includes(:equipment, :supplies, :maintenance_logs).find(params[:id])
+    @task = MaintenanceTask.includes(:equipment, :supplies, :maintenance_logs, :instruction_images).find(params[:id])
 
     respond_to do |format|
       format.html
-      format.json { render json: @task.as_json(include: [ :equipment, :supplies, :maintenance_logs ]) }
+      format.json { render json: @task.as_json(include: [ :equipment, :supplies, :maintenance_logs, :instruction_images ]) }
     end
   end
 

@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="460" viewBox="0 0 800 460" role="img" aria-labelledby="title desc">
+  <title id="title">AquaHome vitamin cartridge orientation</title>
+  <desc id="desc">The AquaHome logo side of the flat vitamin cartridge faces outward toward the spray plate and shower.</desc>
+  <rect width="800" height="460" rx="28" fill="#f9fafb"/>
+  <text x="400" y="50" text-anchor="middle" font-family="system-ui, sans-serif" font-size="28" font-weight="700" fill="#111827">Vitamin C + E + A cartridge</text>
+  <path d="M105 145h150" stroke="#2563eb" stroke-width="8" stroke-linecap="round"/>
+  <path d="m238 125 28 20-28 20" fill="none" stroke="#2563eb" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="180" y="112" text-anchor="middle" font-family="system-ui, sans-serif" font-size="20" font-weight="600" fill="#1e40af">Water flow</text>
+  <g transform="translate(310 95)">
+    <ellipse cx="105" cy="135" rx="105" ry="130" fill="#fef3c7" stroke="#92400e" stroke-width="7"/>
+    <ellipse cx="105" cy="135" rx="78" ry="101" fill="#fde68a" stroke="#d97706" stroke-width="4" stroke-dasharray="9 8"/>
+    <text x="105" y="124" text-anchor="middle" font-family="system-ui, sans-serif" font-size="22" font-weight="700" fill="#78350f">AquaHome</text>
+    <text x="105" y="154" text-anchor="middle" font-family="system-ui, sans-serif" font-size="17" fill="#78350f">logo side</text>
+  </g>
+  <path d="M545 230h145" stroke="#16a34a" stroke-width="8" stroke-linecap="round"/>
+  <path d="m672 210 28 20-28 20" fill="none" stroke="#16a34a" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+  <g transform="translate(706 145)" fill="#93c5fd" stroke="#1d4ed8" stroke-width="3">
+    <circle cx="0" cy="0" r="7"/><circle cx="32" cy="20" r="7"/><circle cx="5" cy="43" r="7"/><circle cx="38" cy="62" r="7"/><circle cx="8" cy="85" r="7"/><circle cx="34" cy="106" r="7"/><circle cx="3" cy="129" r="7"/><circle cx="38" cy="149" r="7"/>
+  </g>
+  <text x="650" y="110" text-anchor="middle" font-family="system-ui, sans-serif" font-size="20" font-weight="600" fill="#166534">Toward spray face</text>
+  <text x="650" y="135" text-anchor="middle" font-family="system-ui, sans-serif" font-size="18" fill="#166534">and shower</text>
+  <rect x="65" y="385" width="670" height="48" rx="14" fill="#dcfce7"/>
+  <text x="400" y="417" text-anchor="middle" font-family="system-ui, sans-serif" font-size="21" font-weight="700" fill="#166534">Install with the AquaHome logo visible from the spray-plate side.</text>
+</svg>

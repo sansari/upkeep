@@ -2,6 +2,7 @@ class MaintenanceTask < ApplicationRecord
   belongs_to :equipment
   has_many :maintenance_logs, dependent: :destroy
   has_many :supplies, dependent: :destroy
+  has_many :instruction_images, -> { order(:position, :id) }, class_name: "MaintenanceTaskImage", dependent: :destroy
 
   has_one :area, through: :equipment
 

@@ -1,0 +1,13 @@
+vitamin_orientation:
+  maintenance_task: replace_shower_filter
+  image_path: /guides/aquahome-vitamin-cartridge-orientation.svg
+  alt_text: Vitamin cartridge with logo side facing the spray plate
+  caption: Logo side faces outward.
+  position: 1
+
+main_cartridge_orientation:
+  maintenance_task: replace_shower_filter
+  image_path: /guides/aquahome-20-stage-cartridge-orientation.svg
+  alt_text: Main cartridge with mesh end facing the incoming water
+  caption: Mesh end faces the shower arm.
+  position: 2
