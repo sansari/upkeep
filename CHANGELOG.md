@@ -19,6 +19,10 @@ All notable changes to Upkeep are documented here.
 
   Plan: [plans/016-group-mini-split-maintenance.md](plans/016-group-mini-split-maintenance.md)
 
+### Fixed
+
+- Fixed CI security scans to use the repository's locked Brakeman version instead of failing solely because a newer release exists.
+
 ## 2026-06-15 — Migrate from Railway to Fly.io
 
 Plan: [plans/012-migrate-to-flyio.md](plans/012-migrate-to-flyio.md)
