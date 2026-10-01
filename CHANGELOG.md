@@ -21,6 +21,7 @@ All notable changes to Upkeep are documented here.
 
 ### Fixed
 
+- Updated Rack, Puma, Nokogiri, session, sanitizer, and WebSocket dependencies to patched releases identified by the security audit.
 - Fixed CI security scans to use the repository's locked Brakeman version instead of failing solely because a newer release exists.
 
 ## 2026-06-15 — Migrate from Railway to Fly.io

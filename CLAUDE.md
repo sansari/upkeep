@@ -13,7 +13,7 @@ Notes for Claude Code sessions working on this project.
 
 ## Tech Stack
 
-- Ruby 3.3.7 (via rbenv), Rails 8.1.2, PostgreSQL 17
+- Ruby 3.3.7 (via rbenv), Rails 8.1.4, PostgreSQL 17
 - Hotwire (Turbo + Stimulus), Tailwind CSS (tailwindcss-rails)
 - Propshaft asset pipeline, importmap-rails
 - Solid Queue + Solid Cache (sharing the primary database)
