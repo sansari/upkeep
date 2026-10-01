@@ -1,6 +1,7 @@
 require "test_helper"
 
 class DashboardControllerTest < ActionDispatch::IntegrationTest
+  setup { sign_in }
   test "GET / renders dashboard" do
     get root_path
     assert_response :success

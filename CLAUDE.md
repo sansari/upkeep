@@ -9,7 +9,7 @@ Notes for Claude Code sessions working on this project.
 - **Architecture**: Areas → Equipment → MaintenanceTasks → MaintenanceLogs + Supplies
 - **Web app is read-only** — a status dashboard only, no forms or admin UI
 - **All data management happens through Claude Code conversations** using rake tasks, Rails runner scripts, and Rails console
-- **No authentication** — personal use, accessed directly via URL
+- **Single-user authentication** — a shared password from `UPKEEP_PASSWORD` protects all household data and JSON endpoints
 
 ## Tech Stack
 
@@ -52,6 +52,13 @@ Or query directly: `bin/rails runner 'Area.all.each { |a| puts "#{a.id}: #{a.nam
 ### Shell Environment
 - Always ensure your Ruby version manager (rbenv, rvm, etc.) is active before running commands
 - On macOS with rbenv via Homebrew, prefix commands with `source ~/.zshrc &&` if the correct Ruby isn't on PATH
+
+### Authentication
+- `ApplicationController` requires an encrypted authentication cookie for all application routes
+- Browser requests redirect to `/session/new`; unauthenticated JSON requests return `401`
+- The login password comes only from the `UPKEEP_PASSWORD` environment variable and is never committed
+- Authentication lasts one year; changing the password invalidates existing cookies
+- `/up`, the PWA manifest/service worker, and static icons remain public
 
 ### Dashboard Behavior
 - Shows tasks due within **2 weeks** (14 days) or overdue
@@ -118,6 +125,7 @@ app/
     maintenance_logs_controller.rb  # Log page
     supplies_controller.rb
     push_subscriptions_controller.rb  # Web Push subscription management
+    sessions_controller.rb            # Shared-password login/logout
   models/
     area.rb                    # has_many :equipment
     equipment.rb               # belongs_to :area, has_many :maintenance_tasks
@@ -126,8 +134,10 @@ app/
     supply.rb                  # Inventory tracking with low_stock?
     push_subscription.rb       # Web Push subscription (endpoint, keys)
   views/
-    layouts/application.html.erb  # Nav, badge controller, permission banner
-    dashboard/index.html.erb      # Main dashboard view
+    layouts/application.html.erb    # Nav, badge controller, permission banner
+    layouts/authentication.html.erb # Standalone login layout
+    sessions/new.html.erb           # Password sign-in screen
+    dashboard/index.html.erb        # Main dashboard view
     pwa/
       manifest.json.erb           # PWA manifest
       service-worker.js           # Service worker with push handlers
@@ -159,7 +169,7 @@ See `fly.toml` for machine configuration. Key points:
 
 - **App name / URL**: Set in `fly.toml`. Run `flyctl launch` to provision a new app.
 - **Database**: Attach an unmanaged Postgres app via `flyctl postgres create` + `flyctl postgres attach`
-- **Required secrets**: `flyctl secrets set RAILS_MASTER_KEY=$(cat config/master.key)`
+- **Required secrets**: `RAILS_MASTER_KEY` and `UPKEEP_PASSWORD`, both set with `flyctl secrets`
 - **`DATABASE_URL`** is auto-set by Fly when you attach a Postgres database
 - **VAPID keys** for Web Push are stored in Rails credentials (encrypted), not env vars — generate with `bin/rails credentials:edit`
 - **`SOLID_QUEUE_IN_PUMA=1`** is set in `fly.toml` env section

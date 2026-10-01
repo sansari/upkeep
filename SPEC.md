@@ -25,7 +25,7 @@ House
 
 ### Users
 
-This is a personal app for 1–2 people (you and your partner). There is no authentication — the app is accessed via its Fly.io-provided URL.
+This is a personal app for 1–2 people (you and your partner). A shared single-user password protects the app at its Fly.io-provided URL; there are no user accounts or public registration.
 
 ---
 
@@ -166,7 +166,16 @@ Something consumed during maintenance — filters, parts, cleaning products, etc
 
 ## 4. Web Dashboard
 
-The web app is **read-only** and **mobile-friendly**. No forms, no login.
+The web app is **read-only** and **mobile-friendly**. The only form is the password sign-in screen.
+
+### 4.0 Authentication — `GET/POST/DELETE /session`
+
+- All household data, JSON endpoints, task completion actions, and push-subscription endpoints require authentication.
+- Browser requests redirect to the password sign-in page; unauthenticated JSON requests return `401 Unauthorized`.
+- A successful sign-in creates an encrypted, HTTP-only, same-site cookie lasting one year.
+- Changing `UPKEEP_PASSWORD` invalidates existing authentication cookies.
+- Sign-in attempts are limited to 10 per IP address every 3 minutes.
+- The health check, PWA manifest, service worker, and static icons remain public and contain no household data.
 
 ### 4.1 Home Dashboard — `GET /`
 
@@ -242,7 +251,7 @@ Reverse-chronological list of all completed maintenance tasks:
 
 ### 4.8 JSON API
 
-Every route above also responds to `.json` format, returning the same data as JSON. This is for:
+Every route above also responds to `.json` format, returning the same data as JSON after authentication. Unauthenticated JSON requests return `401 Unauthorized`. This is for:
 - Future iOS app
 - Direct `curl` access
 - Claude Code API calls if needed
@@ -380,7 +389,7 @@ Tasks are categorized by their `next_due_at` relative to now:
 - **Machines:** 2x shared-cpu-1x, 1GB RAM, always-on (`auto_stop_machines = 'off'`)
 - **Database:** Unmanaged PostgreSQL 17, single database shared by primary, Solid Cache, Solid Queue
 - **No custom domain needed**
-- **No authentication needed**
+- **Authentication:** Shared password supplied through the `UPKEEP_PASSWORD` Fly secret
 
 ### Environment Variables
 
@@ -388,6 +397,7 @@ Tasks are categorized by their `next_due_at` relative to now:
 |-----------------------|-----------------------------------------------|---------------------|
 | `DATABASE_URL`        | PostgreSQL connection                         | Auto-set by Fly     |
 | `RAILS_MASTER_KEY`    | Decrypts `config/credentials.yml.enc`        | `flyctl secrets`    |
+| `UPKEEP_PASSWORD`     | Shared password for web and JSON access       | `flyctl secrets`    |
 | `SOLID_QUEUE_IN_PUMA` | `1` — runs Solid Queue inside Puma process   | `fly.toml`          |
 
 ### Deployment Files
@@ -405,12 +415,13 @@ Tasks are categorized by their `next_due_at` relative to now:
 The app is a Progressive Web App that can be added to the iOS/Android home screen.
 
 ### Manifest
-- Served at `/manifest.json` via `Rails::PwaController`
+- Served publicly at `/manifest.json` via `Rails::PwaController`; it contains no household data
 - `display: standalone` for full-screen app experience
 - App name: "Upkeep", theme color: `#dc2626` (red)
 
 ### Service Worker
-- Minimal service worker at `/service-worker.js` — install + activate + push handlers
+- Served publicly at `/service-worker.js` so installation and push handling work before sign-in
+- Minimal service worker — install + activate + push handlers
 - No complex caching (this is a simple status dashboard)
 
 ### App Icon Badge
@@ -434,7 +445,7 @@ The app is a Progressive Web App that can be added to the iOS/Android home scree
 
 These are documented for future reference but are **not yet built**:
 
-- **User authentication** — Devise or custom auth, multi-user households with task assignment
+- **Multi-user accounts** — Replace the shared password with individual accounts and household task assignment
 - **Native iOS app** — Separate repository, Swift/SwiftUI, consumes the JSON API
 - **Photo attachments** — Active Storage for photos of equipment, issues, completed work
 - **Email/push notifications** — Alerts when tasks become overdue or due soon

@@ -1,6 +1,7 @@
 require "test_helper"
 
 class MaintenanceTasksControllerTest < ActionDispatch::IntegrationTest
+  setup { sign_in }
   test "GET /tasks/:id renders task detail" do
     get maintenance_task_path(maintenance_tasks(:replace_water_filter))
     assert_response :success

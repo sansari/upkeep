@@ -1,6 +1,7 @@
 require "test_helper"
 
 class EquipmentControllerTest < ActionDispatch::IntegrationTest
+  setup { sign_in }
   test "GET /equipment/:id renders equipment detail" do
     get equipment_path(equipment(:water_filter))
     assert_response :success

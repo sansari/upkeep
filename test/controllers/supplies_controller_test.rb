@@ -1,6 +1,7 @@
 require "test_helper"
 
 class SuppliesControllerTest < ActionDispatch::IntegrationTest
+  setup { sign_in }
   test "GET /supplies renders list" do
     get supplies_path
     assert_response :success

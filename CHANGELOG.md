@@ -2,6 +2,14 @@
 
 All notable changes to Upkeep are documented here.
 
+## 2026-10-01
+
+### Added
+
+- Added shared-password authentication for all household data and JSON endpoints, with one-year encrypted sessions, sign-out, rate-limited login attempts, and unauthenticated API protection. The health check and non-sensitive PWA assets remain public.
+
+  Plan: [plans/014-single-user-authentication.md](plans/014-single-user-authentication.md)
+
 ## 2026-06-15 — Migrate from Railway to Fly.io
 
 Plan: [plans/012-migrate-to-flyio.md](plans/012-migrate-to-flyio.md)

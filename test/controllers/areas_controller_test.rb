@@ -1,6 +1,7 @@
 require "test_helper"
 
 class AreasControllerTest < ActionDispatch::IntegrationTest
+  setup { sign_in }
   test "GET /areas renders list" do
     get areas_path
     assert_response :success

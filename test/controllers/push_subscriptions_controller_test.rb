@@ -1,6 +1,7 @@
 require "test_helper"
 
 class PushSubscriptionsControllerTest < ActionDispatch::IntegrationTest
+  setup { sign_in }
   test "create saves a new subscription" do
     assert_difference "PushSubscription.count", 1 do
       post push_subscriptions_url, params: {

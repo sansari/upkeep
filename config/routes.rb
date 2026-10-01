@@ -1,9 +1,11 @@
 Rails.application.routes.draw do
   root "dashboard#index"
 
+  resource :session, only: [ :new, :create, :destroy ]
+
   # PWA
-  get "manifest" => "rails/pwa#manifest", as: :pwa_manifest
-  get "service-worker" => "rails/pwa#service_worker", as: :pwa_service_worker
+  get "manifest" => "rails/pwa#manifest", as: :pwa_manifest, defaults: { format: :json }
+  get "service-worker" => "rails/pwa#service_worker", as: :pwa_service_worker, defaults: { format: :js }
 
   resources :push_subscriptions, only: [ :create, :destroy ]
 
