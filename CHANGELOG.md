@@ -21,6 +21,7 @@ All notable changes to Upkeep are documented here.
 
 ### Fixed
 
+- Removed duplicate Fly deployment from CI, retained the dedicated deploy workflow, and added manual workflow dispatch support.
 - Updated Rack, Puma, Nokogiri, session, sanitizer, and WebSocket dependencies to patched releases identified by the security audit.
 - Fixed CI security scans to use the repository's locked Brakeman version instead of failing solely because a newer release exists.
 
